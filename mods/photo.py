@@ -20,23 +20,27 @@ class PhotoManager:
 
         self.cameras = []
         for i in range(10):
-            camera = cv2.VideoCapture(i)
+            print(i)
+            camera = cv2.VideoCapture(i, cv2.CAP_DSHOW)
             result, img = camera.read()
+            print(result, img)
             if result == True:
                 self.cameras.append(camera)
             else:
                 camera.release()
         
         self.size = size
+        print("Size", size)
 
         self.logger.info(f"Found {len(self.cameras)} cameras")
 
 
     def destroy(self):
-        '''Deletes the VideoCapture object, freeing it as a resource.'''
+        '''Deletes the VideoCapture objects, them as a resource.'''
         for camera in self.cameras:
             camera.release()
         del(self.cameras)
+        cv2.destroyAllWindows()
 
 
     def take_photo(self, feed: int = 0):
@@ -47,10 +51,7 @@ class PhotoManager:
         if len(self.cameras) > feed:
             result, img = self.cameras[feed].read()
             if result == True:
-                self.logger.debug(f"Photo captured from feed {feed}")
                 img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
                 img.thumbnail(size=self.size)
                 return img
-            else:
-                self.logger.warning(f"Photo capture from feed {feed} failed")
         return None

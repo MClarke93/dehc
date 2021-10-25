@@ -796,20 +796,26 @@ class DataEntry(SuperWidget):
         cameras = len(self.photomanager.cameras)
         photoframe = []
         if cameras > 0:
-            photoframe.append(ttk.Button(master=window, command=lambda *_: update(feed=0)))
-            photoframe[0].grid(column=0, row=0, columnspan=2, sticky='nsew', padx=2, pady=2)
+            photoframe.append(ttk.Button(master=window, text="A", command=lambda *_: update(feed=0)))
+            if cameras == 1:
+                photoframe[0].grid(column=0, row=0, columnspan=2, sticky='nsew', padx=2, pady=2)
+            else:
+                photoframe[0].grid(column=0, row=0, sticky='nsew', padx=2, pady=2)
             fetch_photo(0)
         if cameras > 1:
-            photoframe.append(ttk.Button(master=window, command=lambda *_: update(feed=1)))
-            photoframe[1].grid(column=1, row=0, columnspan=2, sticky='nsew', padx=2, pady=2)
+            photoframe.append(ttk.Button(master=window, text="B", command=lambda *_: update(feed=1)))
+            photoframe[1].grid(column=1, row=0, sticky='nsew', padx=2, pady=2)
             fetch_photo(1)
         if cameras > 2:
-            photoframe.append(ttk.Button(master=window, command=lambda *_: update(feed=2)))
-            photoframe[2].grid(column=0, row=1, columnspan=2, sticky='nsew', padx=2, pady=2)
+            photoframe.append(ttk.Button(master=window, text="C", command=lambda *_: update(feed=2)))
+            if cameras == 3:
+                photoframe[2].grid(column=0, row=1, columnspan=2, sticky='nsew', padx=2, pady=2)
+            else:
+                photoframe[2].grid(column=0, row=1, sticky='nsew', padx=2, pady=2)
             fetch_photo(2)
         if cameras > 3:
-            photoframe.append(ttk.Button(master=window, command=lambda *_: update(feed=3)))
-            photoframe[3].grid(column=1, row=1, columnspan=2, sticky='nsew', padx=2, pady=2)
+            photoframe.append(ttk.Button(master=window, text="D", command=lambda *_: update(feed=3)))
+            photoframe[3].grid(column=1, row=1, sticky='nsew', padx=2, pady=2)
             fetch_photo(3)
 
 
