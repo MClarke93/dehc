@@ -437,6 +437,12 @@ class DataEntry(SuperWidget):
 
         def buttond(*args):
             webbrowser.open(f"{url}/function?somedataname=somedata&someotherdataname=someotherdata")
+        
+        def onclose(*args):
+            self.root.focus_set()
+            window.destroy()
+
+        window.protocol("WM_DELETE_WINDOW", onclose)
 
         w_bu_a = ttk.Button(master=window, text="Gate Check", command=buttona)
         w_bu_b = ttk.Button(master=window, text="Assign All Unboarded", command=buttonb)
@@ -776,6 +782,12 @@ class DataEntry(SuperWidget):
             self.logger.debug(f"Closed photo window")
             self.data_change()
 
+        def onclose(*args):
+            self.root.focus_set()
+            window.destroy()
+
+        window.protocol("WM_DELETE_WINDOW", onclose)
+
         self.logger.debug(f"Preparing photo window widgets")
 
         clearbut = ttk.Button(master=window, text="Clear", command=clear)
@@ -954,8 +966,14 @@ class DataEntry(SuperWidget):
                     self.logger.debug(f"List field's read window closed")
                     self.data_change()
 
+                def onclose(*args):
+                    self.root.focus_set()
+                    window.destroy()
+
+                window.protocol("WM_DELETE_WINDOW", onclose)
+
                 self.logger.debug(f"Prepare read window widgets")
-                tree = SearchTree(master=window, db=self.db, base=base, cats=self.cats, level=self.level, prepare=True, simple=True, hardware=self.hardware)
+                tree = SearchTree(master=window, db=self.db, base=base, cats=self.cats, level=self.level, prepare=True, simple=True, statusbar=self.statusbar, hardware=self.hardware)
                 namelistlb = ttk.Label(master=window, text="Guardians")
                 namelist = tk.Listbox(master=window, selectmode=tk.SINGLE)
                 for name in entry['values']:
@@ -1037,6 +1055,12 @@ class DataEntry(SuperWidget):
                     window.destroy()
                     self.logger.debug(f"List field's read window closed")
                     self.data_change()
+
+                def onclose(*args):
+                    self.root.focus_set()
+                    window.destroy()
+
+                window.protocol("WM_DELETE_WINDOW", onclose)
 
                 self.logger.debug(f"Prepare read window widgets")
                 idvar = tk.StringVar()
@@ -1778,6 +1802,12 @@ class SearchTree(SuperWidget):
             else:
                 self.logger.warning(f"Search for physical ID {physid} failed. Multiple matches")
                 feedback.config(text="Multiple matching IDs found")
+
+        def onclose(*args):
+            self.root.focus_set()
+            window.destroy()
+
+        window.protocol("WM_DELETE_WINDOW", onclose)
 
         self.logger.debug("Preparing scan window widgets")
         input_var = tk.StringVar()

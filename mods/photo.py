@@ -20,17 +20,14 @@ class PhotoManager:
 
         self.cameras = []
         for i in range(10):
-            print(i)
             camera = cv2.VideoCapture(i, cv2.CAP_DSHOW)
             result, img = camera.read()
-            print(result, img)
             if result == True:
                 self.cameras.append(camera)
             else:
                 camera.release()
         
         self.size = size
-        print("Size", size)
 
         self.logger.info(f"Found {len(self.cameras)} cameras")
 
