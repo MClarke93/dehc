@@ -7,7 +7,7 @@ import webbrowser
 
 from PIL import Image, ImageTk
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 from typing import Callable
 
 import mods.database as md
@@ -768,6 +768,19 @@ class DataEntry(SuperWidget):
         def from_file():
             '''Loads a file from disk.'''
             self.logger.debug(f"From file button activated")
+            window.attributes("-topmost", False)
+            img_path = filedialog.askopenfilename()
+            window.attributes("-topmost", True)
+            if img_path != "":
+                img = Image.open(fp=img_path)
+                img.thumbnail(size=self.photomanager.size)
+                img = ImageTk.PhotoImage(img)
+                self.w_bu_photo.config(image=img)
+                self.w_bu_photo.image = img
+                self.logger.info(f"Photo {img_path} pushed to data pane")
+                window.destroy()
+                self.logger.debug(f"Closed photo window")
+                self.data_change()
 
         def update(feed: int = 0):
             '''Pushes current photo to data pane. Can function as a callback.'''
