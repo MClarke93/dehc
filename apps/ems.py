@@ -153,7 +153,7 @@ class EMS():
         self.active = tree
         self.active.w_tr_tree.configure(style="active.Treeview")
         self.logger.info(f"Item {doc.get('_id','_')} was selected")
-        self.de.show(doc)
+        self.de.show(doc, summation=bool(self.active.w_var_sumdata.get()))
 
 
     def delete(self, *args):

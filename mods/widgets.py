@@ -3,19 +3,19 @@
 import json
 import re
 import time
+import tkinter as tk
 import webbrowser
 
 from PIL import Image, ImageTk
-import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable
+from urllib.parse import urlencode
 
 import mods.database as md
 import mods.log as ml
 import mods.photo as mp
 import mods.dehc_hardware as hw
 import mods.id_card_generation as card_gen
-
 
 # ----------------------------------------------------------------------------
 
@@ -126,6 +126,9 @@ class StatusBar(SuperWidget):
         '''
         super().__init__(master=master, db=db, level=level)
 
+        self.root = self.w_fr.winfo_toplevel()
+        self.statusbar = self
+
         if prepare == True:
             self.prepare()
 
@@ -134,14 +137,24 @@ class StatusBar(SuperWidget):
         '''Constructs the frames and widgets of the StatusBar.'''
         self.logger.debug(f"Preparing widgets")
         self.w_status = tk.Label(master=self.w_fr, text="", justify=tk.LEFT, anchor="w", font="Arial 9 bold", background='#dcdad5')
-        self.w_time = tk.Label(master=self.w_fr, text="Server Online", justify=tk.RIGHT, anchor="e", font="Arial 9 bold", background='#dcdad5')
-        
-    
+        self.w_time = tk.Label(master=self.w_fr, text="", justify=tk.RIGHT, anchor="e", font="Arial 9 bold", background='#dcdad5')
+        self.update_time()
+
+
     def _pack_children(self):
         '''Packs & grids children frames and widgets of the StatusBar.'''
         self.logger.debug(f"Packing and gridding widgets")
         self.w_status.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(3,0), pady=(0,1))
         self.w_time.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(0,3), pady=(0,1))
+
+
+    @busy
+    def update_time(self):
+        new_time = self.db.time_get()
+        if new_time != None:
+            self.logger.debug("Updated Server Time")
+            self.w_time.config(text=f"Server Time: {new_time}")
+        self.w_fr.after(ms=15000, func=self.update_time)
 
 
 # ----------------------------------------------------------------------------
@@ -179,6 +192,7 @@ class DataEntry(SuperWidget):
         self.readonly = readonly               # Whether or not the application is in readonly mode
         self.root = self.w_fr.winfo_toplevel() # Root widget that contains this SuperWidget
         self.statusbar = statusbar             # The status bar associated with this DataEntry
+        self.summation = False                 # Whether or not the DataEntry will show summable fields
         self.trash = trash                     # The UUID of the recycle bin
         self.web = web                         # The filepath to the web server authentication file
         self._delete = delete                  # The parent object's callback to run when delete is pressed.
@@ -237,9 +251,9 @@ class DataEntry(SuperWidget):
         self.w_fr.rowconfigure(index=3, weight=1, minsize=24)
 
         self.w_fr_head.columnconfigure(index=0, weight=1000)
-        self.w_fr_head.columnconfigure(index=1, weight=1, minsize=48)
-        self.w_fr_head.columnconfigure(index=2, weight=1, minsize=48)
-        self.w_fr_head.columnconfigure(index=3, weight=1, minsize=48)
+        self.w_fr_head.columnconfigure(index=1, weight=1, minsize=32)
+        self.w_fr_head.columnconfigure(index=2, weight=1, minsize=32)
+        self.w_fr_head.columnconfigure(index=3, weight=1, minsize=32)
         self.w_fr_head.rowconfigure(index=0, weight=1000)
 
         self.w_fr_photo.columnconfigure(index=0, weight=1000)
@@ -295,6 +309,13 @@ class DataEntry(SuperWidget):
         if self.godmode == True:
             self.w_bu_admin = ttk.Button(master=self.w_fr_foot, text="Admin")
         self.w_co_cat.current(0)
+
+        self.w_bu_photo.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
+        self.w_bu_editphoto.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
+        self.w_li_flags.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
+        self.w_co_flags.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
+        self.w_bu_add.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
+        self.w_bu_remove.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
 
         if self.readonly == False:
             self.w_bu_edit.configure(command=self.edit)
@@ -410,7 +431,9 @@ class DataEntry(SuperWidget):
     def admin(self, *args):
         '''Callback for when the admin button is pressed.'''
         self.logger.debug(f"Admin button activated")
-        window = tk.Toplevel()
+        for child in self.w_bu_admin.winfo_children():
+                child.destroy()
+        window = tk.Toplevel(master=self.w_bu_admin)
         window.attributes("-topmost", True)
         window.focus_force()
         window.title("Item Administration")
@@ -423,42 +446,49 @@ class DataEntry(SuperWidget):
         def buttona(*args):
             id = self.last_doc.get("_id","")
             if id != "":
-                webbrowser.open(f"{url}/gatecheck?contid={id}")
+                self.db.flag_assign_tree(container=id, flag="Ub-Unboarded")
 
         def buttonb(*args):
             id = self.last_doc.get("_id","")
             if id != "":
-                self.db.flag_assign_tree(container=id, flag="Ub-Unboarded")
+                self.db.flag_revoke_tree(container=id, flag="Ub-Unboarded")
 
         def buttonc(*args):
             id = self.last_doc.get("_id","")
             if id != "":
-                self.db.flag_revoke_tree(container=id, flag="Ub-Unboarded")
+                payload = {'vesselid': id}
+                webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/manifest?{urlencode(payload)}")
 
         def buttond(*args):
-            webbrowser.open(f"{url}/function?somedataname=somedata&someotherdataname=someotherdata")
-        
+            webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/grafana/")
+
+        def buttone(*args):
+            webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/dscan/")
+
         def onclose(*args):
             self.root.focus_set()
             window.destroy()
 
         window.protocol("WM_DELETE_WINDOW", onclose)
 
-        w_bu_a = ttk.Button(master=window, text="Gate Check", command=buttona)
-        w_bu_b = ttk.Button(master=window, text="Assign All Unboarded", command=buttonb)
-        w_bu_c = ttk.Button(master=window, text="Revoke All Unboarded", command=buttonc)
-        w_bu_d = ttk.Button(master=window, text="Button D", command=buttond)
+        w_bu_a = ttk.Button(master=window, text="Assign All Unboarded", command=buttona)
+        w_bu_b = ttk.Button(master=window, text="Revoke All Unboarded", command=buttonb)
+        w_bu_c = ttk.Button(master=window, text="Open Manifest", command=buttonc)
+        w_bu_d = ttk.Button(master=window, text="Open Dashboard", command=buttond)
+        w_bu_e = ttk.Button(master=window, text="Open QR Scanner", command=buttone)
 
         window.columnconfigure(index=0, weight=1000)
         window.rowconfigure(index=0, weight=1000)
         window.rowconfigure(index=1, weight=1000)
         window.rowconfigure(index=2, weight=1000)
         window.rowconfigure(index=3, weight=1000)
+        window.rowconfigure(index=4, weight=1000)
 
-        #w_bu_a.grid(column=0, row=0, sticky="nsew", padx=2, pady=2)
-        w_bu_b.grid(column=0, row=1, sticky="nsew", padx=2, pady=2)
-        w_bu_c.grid(column=0, row=2, sticky="nsew", padx=2, pady=2)
-        #w_bu_d.grid(column=0, row=3, sticky="nsew", padx=2, pady=2)
+        w_bu_a.grid(column=0, row=0, sticky="nsew", padx=3, pady=(3,2))
+        w_bu_b.grid(column=0, row=1, sticky="nsew", padx=3, pady=2)
+        w_bu_c.grid(column=0, row=2, sticky="nsew", padx=3, pady=2)
+        w_bu_d.grid(column=0, row=3, sticky="nsew", padx=3, pady=(15,2))
+        w_bu_e.grid(column=0, row=4, sticky="nsew", padx=3, pady=(2,3))
 
 
     @busy
@@ -1027,6 +1057,7 @@ class DataEntry(SuperWidget):
                         idlist.insert("end", id)
                         identry.delete(0, "end")
                         self.logger.info(f"Added {id} to physical ID list")
+                        identry.focus_set()
                     else:
                         self.logger.debug(f"Did not add to physical ID list, as id was blank or already existed")
 
@@ -1060,6 +1091,15 @@ class DataEntry(SuperWidget):
                     '''Callback when submit button is pressed.'''
                     self.logger.debug(f"Submit button activated in physical ID list window")
                     values = idlist.get(0,"end")
+                    cur_id = self.last_doc.get("_id","")
+                    for value in values:
+                        existing = self.db.ids_find(physid=value)
+                        if cur_id in existing:
+                            existing.remove(cur_id)
+                        if len(existing) > 0:
+                            messagebox.showwarning("Duplicated ID", f"Physical ID \"{value}\" already exists in the database")
+                            return
+
                     entry.config(values=values)
                     if len(values) > 0:
                         entry.current(0)
@@ -1185,11 +1225,15 @@ class DataEntry(SuperWidget):
 
 
     @busy
-    def show(self, doc: dict = None):
+    def show(self, doc: dict = None, summation: bool = None):
         '''Displays a new document.
         
         doc: The document to display. If omitted, the previous document will be used.
+        summation: If included, sets summation (whether to show summable fields) to this value.
         '''
+        if summation != None:
+            self.summation = summation
+
         if doc != None:
             if self.last_doc != doc:
                 self.back_doc = self.last_doc
@@ -1327,7 +1371,7 @@ class DataEntry(SuperWidget):
                         buttonb.bind("<Button-1>", lambda e: self.readlist(event=e, source="IDS"))
                         buttona = ttk.Button(master=self.w_fr_data, text="Show", state="normal")
                         buttona.bind("<Button-1>", lambda e: self.showlist(event=e, source="IDS"))
-                        buttonc = ttk.Button(master=self.w_fr_data, text="Create", state="normal")
+                        buttonc = ttk.Button(master=self.w_fr_data, text="New Dep", state="normal")
                         if self.readonly == False:
                             buttonc.bind("<Button-1>", self.newchild)
                     elif source == "PHYSIDS":
@@ -1338,7 +1382,7 @@ class DataEntry(SuperWidget):
                         buttonc = None
                     hidden = value
 
-                elif w_type == "sum":
+                elif w_type == "sum" and self.summation == True:
                     entry = ttk.Entry(master=self.w_fr_data)
                     if self.last_doc.get('_id','') != "":
                         children = self.db.container_children_all(container=self.last_doc["_id"], cat=info['cat'], result="DOC")
@@ -1365,7 +1409,7 @@ class DataEntry(SuperWidget):
                     buttonc = None
                     hidden = ""
                 
-                elif w_type == "count":
+                elif w_type == "count" and self.summation == True:
                     entry = ttk.Entry(master=self.w_fr_data)
                     if self.last_doc.get('_id','') != "":
                         children = self.db.container_children_all(container=self.last_doc["_id"], cat=info['cat'], result="DOC")
@@ -1526,9 +1570,10 @@ class SearchTree(SuperWidget):
 
         self.w_fr.columnconfigure(0, weight=1, minsize=128)
         self.w_fr.columnconfigure(1, weight=1, minsize=16)
-        self.w_fr.columnconfigure(2, weight=1000, minsize=48)
-        self.w_fr.columnconfigure(3, weight=1000, minsize=48)
-        self.w_fr.columnconfigure(4, weight=1, minsize=16)
+        self.w_fr.columnconfigure(2, weight=1000, minsize=32)
+        self.w_fr.columnconfigure(3, weight=1000, minsize=32)
+        self.w_fr.columnconfigure(4, weight=1000, minsize=32)
+        self.w_fr.columnconfigure(5, weight=1, minsize=16)
         self.w_fr.rowconfigure(0, weight=1, minsize=24)
         self.w_fr.rowconfigure(1, weight=1000)
         self.w_fr.rowconfigure(2, weight=1, minsize=17)
@@ -1553,6 +1598,7 @@ class SearchTree(SuperWidget):
             self.w_var_autoopen.set(1)
         self.w_var_summation = tk.IntVar()
         self.w_var_summation.trace("w", self.summation_toggle)
+        self.w_var_sumdata = tk.IntVar()
 
         # Widgets
         self.w_co_cat = ttk.Combobox(master=self.w_fr_search, values=self.cats, textvariable=self.w_var_cat, state="readonly")
@@ -1565,8 +1611,9 @@ class SearchTree(SuperWidget):
         self.w_li_search = tk.Listbox(master=self.w_fr, selectmode=tk.SINGLE, relief=tk.GROOVE, exportselection=False)
         self.w_tr_tree = ttk.Treeview(master=self.w_fr, columns=list(range(1,len(self.summables)+2)), show="tree", selectmode="browse", style="unactive.Treeview")
         self.w_tr_tree.SearchTree = self
-        self.w_ch_autoopen = ttk.Checkbutton(master=self.w_fr, variable=self.w_var_autoopen, text="Auto Open?")
-        self.w_ch_summation = ttk.Checkbutton(master=self.w_fr, variable=self.w_var_summation, text="Show Sums?")
+        self.w_ch_autoopen = ttk.Checkbutton(master=self.w_fr, variable=self.w_var_autoopen, text="Open Items")
+        self.w_ch_summation = ttk.Checkbutton(master=self.w_fr, variable=self.w_var_summation, text="Sums on Tree")
+        self.w_ch_sumdata = ttk.Checkbutton(master=self.w_fr, variable=self.w_var_sumdata, text="Sums in Data")
 
         self.w_en_value.bind("<Return>", self.search, add="+")
         self.w_li_search.bind("<<ListboxSelect>>", self.search_select)
@@ -1632,12 +1679,13 @@ class SearchTree(SuperWidget):
         self.w_bu_scan.grid(column=6, row=0, sticky="nsew", padx=1, pady=1)
         self.w_li_search.grid(column=0, row=1, rowspan=2, sticky="nsew", padx=1, pady=1)
         self.w_sc_search.grid(column=1, row=1, rowspan=2, sticky="nse", padx=1, pady=1)
-        self.w_tr_tree.grid(column=2, row=1, columnspan=2, sticky="nsew", padx=1, pady=1)
-        self.w_sc_tree.grid(column=4, row=1, sticky="nse", padx=1, pady=1)
+        self.w_tr_tree.grid(column=2, row=1, columnspan=3, sticky="nsew", padx=1, pady=1)
+        self.w_sc_tree.grid(column=5, row=1, sticky="nse", padx=1, pady=1)
 
         if self.simple == False:
             self.w_ch_autoopen.grid(column=2, row=2, sticky="nsew", padx=1, pady=1)
-            self.w_ch_summation.grid(column=3, row=2, columnspan=2, sticky="nsew", padx=1, pady=1)
+            self.w_ch_summation.grid(column=3, row=2, sticky="nsew", padx=1, pady=1)
+            self.w_ch_sumdata.grid(column=4, row=2, columnspan=2, sticky="nsew", padx=1, pady=1)
 
 
     def altpress(self, *args):

@@ -1520,4 +1520,14 @@ class DEHCDatabase:
         return list(dict.fromkeys(summables))
 
 
+    def time_get(self):
+        '''Retrieves the current server time. Returns None if there's an issue.'''
+        try:
+            doc = self.db.document_get(dbname=self.db_configs, id="timecheck", lazy=False)
+            time = doc["Server Time"]
+            return time
+        except:
+            return None
+
+
 # ----------------------------------------------------------------------------
