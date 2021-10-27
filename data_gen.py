@@ -22,7 +22,7 @@ parser.add_argument('-v','--vers', type=str, default=DBVERSION, help="schema ver
 parser.add_argument('-O','--ovdb', help="if included, disables database version detection. Use with caution, as it may result in lost data", action='store_true')
 args = parser.parse_args()
 
-db = md.DEHCDatabase(config=args.auth, version=args.vers, forcelocal=args.forc, level="DEBUG", namespace=args.name, overridedbversion=args.ovdb, schema=args.sche, quickstart=False)
+db = md.DEHCDatabase(config=args.auth, version=args.vers, forcelocal=args.forc, level="INFO", namespace=args.name, overridedbversion=args.ovdb, schema=args.sche, quickstart=False)
 
 db.schema_load(schema=args.sche)
 if args.drop == True:

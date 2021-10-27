@@ -902,6 +902,14 @@ class DEHCDatabase:
         return [row['physid'] for row in res]
 
 
+    def ids_list(self):
+        '''Retrieves every doc from ids database. Intensive!'''
+        self.logger.debug(f"Retrieving all physical IDs")
+        docs = self.db.documents_list(dbname=self.db_ids, limit=self.limit)
+        self.logger.debug(f"Done retrieving all physical IDs")
+        return docs
+
+
     def get_item_by_any_id(self,searchID: str):
         '''Returns item doc when given any ID either _id or physicalID.
         returns False on failure
@@ -927,13 +935,15 @@ class DEHCDatabase:
         self.logger.debug(f"Done preparing indexes")
 
 
-    def item_create(self, cat: str, doc: dict):
+    def item_create(self, cat: str, doc: dict, id: str = None):
         '''Creates new item in items database, returns id.
         
         cat: The item's category.
         doc: The item's data: {"field": "value", ...}
+        id: If specified, this becomes the item's UUID in full
         '''
-        id, = self.db.id_create(length=self.id_len, prefix=cat+"/")
+        if id == None:
+            id, = self.db.id_create(length=self.id_len, prefix=cat+"/")
         self.logger.info(f"Creating new item {id}")
         doc['category'] = cat
         if 'flags' not in doc:
@@ -1063,13 +1073,14 @@ class DEHCDatabase:
         return parents
 
 
-    def items_create(self, cat: str, docs: list):
+    def items_create(self, cat: str, docs: list, ids: list = None):
         '''Creates multiple new items at once, returns ids.
         
         cat: The items' category.
         docs: The items' data: [{"field": "value", ...}, {"field": "value", ...}, ...]
         '''
-        ids = self.db.id_create(n=len(docs), length=self.id_len, prefix=cat+"/")
+        if ids == None:
+            ids = self.db.id_create(n=len(docs), length=self.id_len, prefix=cat+"/")
         self.logger.info(f"Creating {len(ids)} new items")
         new_docs = []
         for doc in docs:
@@ -1316,21 +1327,6 @@ class DEHCDatabase:
         self.logger.debug(f"Done deleting photo of {item}")
 
 
-    def photo_load_base64(self, item: str):
-        '''Loads the photo, associated with an item, from the database, leaves it in base64
-        
-        item: The item to load the photo of.
-        '''
-        self.logger.debug(f"Fetching photo of {item} as base64")
-        name = "photo-"+item
-        if self.db.document_exists(dbname=self.db_files, id=name) == True:
-            self.logger.debug(f"Done fetching photo of {item} as base64")
-            return self.db.document_get(dbname=self.db_files, id=name)['photo']            
-        else:
-            self.logger.debug(f"Done fetching photo of {item} as base64")
-            return None
-
-
     def photo_load(self, item: str):
         '''Loads the photo, associated with an item, from the database.
         
@@ -1346,6 +1342,21 @@ class DEHCDatabase:
             return Image.open(buffer)
         else:
             self.logger.debug(f"Done fetching photo of {item}")
+            return None
+
+
+    def photo_load_base64(self, item: str):
+        '''Loads the photo, associated with an item, from the database, leaves it in base64
+        
+        item: The item to load the photo of.
+        '''
+        self.logger.debug(f"Fetching photo of {item} as base64")
+        name = "photo-"+item
+        if self.db.document_exists(dbname=self.db_files, id=name) == True:
+            self.logger.debug(f"Done fetching photo of {item} as base64")
+            return self.db.document_get(dbname=self.db_files, id=name)['photo']            
+        else:
+            self.logger.debug(f"Done fetching photo of {item} as base64")
             return None
 
 
@@ -1367,6 +1378,30 @@ class DEHCDatabase:
         else:
             self.db.document_create(dbname=self.db_files, doc={"item": item, "photo": data}, id=name)
         self.logger.debug(f"Done saving photo of {item}")
+
+
+    def photo_save_base64(self, item: str, img: str):
+        '''Saves a base64 representation of a photo, associated with an item, to the database.
+        
+        item: The item the photo is associated with.
+        img: The base64-encoded string to save to the database.
+        '''
+        self.logger.info(f"Saving base64 photo of {item}")
+        data = img
+        name = "photo-"+item
+        if self.db.document_exists(dbname=self.db_files, id=name) == True:
+            self.db.document_edit(dbname=self.db_files, doc={"item": item, "photo": data}, id=name)
+        else:
+            self.db.document_create(dbname=self.db_files, doc={"item": item, "photo": data}, id=name)
+        self.logger.debug(f"Done saving base64 photo of {item}")
+
+
+    def photos_list(self):
+        '''Retrieves every doc from the files database. VERY intensive!'''
+        self.logger.debug(f"Retrieving all photos")
+        docs = self.db.documents_list(dbname=self.db_files, limit=self.limit)
+        self.logger.debug(f"Done retrieving all photos")
+        return docs
 
 
     def schema_cats(self):

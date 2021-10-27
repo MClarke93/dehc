@@ -9,6 +9,9 @@ pycache/
 *.txt
 !requirements.txt
 
+# Ignore csv files
+*.csv
+
 # Ignore logs except for .log itself
 *.log
 !.log
