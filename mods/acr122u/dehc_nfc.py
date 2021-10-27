@@ -30,7 +30,10 @@ class NFC_Worker(Hardware_Worker):
     def openDevice(self):
         if self.systemReaders is not None:
             if len(self.systemReaders) > 0:
-                self.reader = self.systemReaders[0] #TODO: Check if valid ACR122U
+                if 'ACR122U' in self.systemReaders[0]: #TODO: Confirm correct functionality
+                    self.reader = self.systemReaders[0] 
+                else: #Preserve original functionality (grab first reader)
+                    self.reader = self.systemReaders[0] 
                 self.connection = True
                 #TODO: Check for alive connection, get reader ATR?
                 print(f'Device opened, {self.reader}')
@@ -62,7 +65,7 @@ class NFC_Worker(Hardware_Worker):
         if self.reader is not None:
             try:
                 cardConnection = self.reader.createConnection()
-                statusConnection = cardConnection.connect() #TODO: Is this useful?
+                statusConnection = cardConnection.connect()
                 cardConnection.transmit(COMMAND_HANDSHAKE)
                 response = cardConnection.transmit(COMMAND)
                 response = self.parseNFCResponse(response)

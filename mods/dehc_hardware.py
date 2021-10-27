@@ -134,7 +134,7 @@ class Hardware:
 
 if __name__ == "__main__":
 
-    hardware = Hardware(makeScales=True,makeBarcodeReader=False, makeNFCReader=False, makePrinter=False)
+    hardware = Hardware(makeScales=True,makeBarcodeReader=True, makeNFCReader=True, makePrinter=True)
 
     time.sleep(1)
 

@@ -204,6 +204,15 @@ class DataEntry(SuperWidget):
         self.photomanager = mp.PhotoManager(level=self.level)
         self.photo_blank = Image.new("RGB", (256, 256), (220, 218, 213))
 
+        self.card_builder = card_gen.IDCardBuilder()
+        self.id_card_image = ImageTk.PhotoImage(Image.new(
+            'RGB', 
+            (
+                int(self.card_builder.id_card_dimensions_portrait[1]/3),
+                int(self.card_builder.id_card_dimensions_portrait[1]/3),
+            )
+        ))
+
         if prepare == True:
             self.prepare()
 
@@ -288,7 +297,7 @@ class DataEntry(SuperWidget):
 
         # Widgets
         self.w_la_title = ttk.Label(master=self.w_fr_head, text="Title", font="Arial 12 bold")
-        self.w_bu_generate_id = ttk.Button(master=self.w_fr_head, text="Print ID", command=self.generate_id_card)
+        self.w_bu_generate_id = ttk.Button(master=self.w_fr_head, text="Print ID", command=self.show_id_window)
         self.w_bu_copyid = ttk.Button(master=self.w_fr_head, text="Copy ID", command=self.copyid)
         self.w_bu_back = ttk.Button(master=self.w_fr_head, text="Back", command=self.back)
         self.w_bu_photo = ttk.Button(master=self.w_fr_photo, text="Photo", command=self.photo)
@@ -526,6 +535,10 @@ class DataEntry(SuperWidget):
 
     def show_id_window(self):
         '''...'''
+        #TODO: Add radial for Landscape/Portrait
+
+        orientation = tk.StringVar()
+
         printers = hw.listPrinters()
         printers = [printer[2] for printer in printers]
 
@@ -541,16 +554,11 @@ class DataEntry(SuperWidget):
             window.title("ID Generation")
             window.configure(background="#DCDAD5")
 
-            msg = ttk.Label(master=window)
             if len(printers) > 0:
                 variable = tk.StringVar(window)
                 variable.set(hw.getDefaultPrinter())
                 printer_list = tk.OptionMenu(window, variable, printers[0], *printers[1:])
                 print_button = ttk.Button(master=window, text="Print")
-
-            def show_image(image: Image):
-                panel = tk.Label(window, image=image)
-                panel.grid(column=0,row=0)
 
             def print_id_card():
                 if len(printers) == 0:
@@ -560,25 +568,60 @@ class DataEntry(SuperWidget):
                 self.logger.debug(f'Printing to: {variable.get()}')
                 self.hardware.sendNewIDCard(self.id_card_printable, variable.get())
 
-            show_image(self.id_card_image)
+            def show_image(image: Image):
+                panel = tk.Label(window, image=image)
+                panel.grid(column=0,row=0, columnspan=2)
 
-            msg.grid(column=0, row=0, sticky="nsew", padx=10, pady=10)
+            def toggle_radio():
+                self.generate_id_card(orientation=orientation.get())
+                show_image(self.id_card_image)
 
-            if len(printers) > 0:
-                print_button.config(command=print_id_card)
-                printer_list.grid(column=0, row=1, sticky='nsew', padx=10, pady=10)
-                print_button.grid(column=0, row=2, sticky="nsew", padx=10, pady=10)
+            def show_window():
+
+                msg.grid(column=0, row=0, sticky="nsew", padx=10, pady=10)
+                landscape_btn.grid(column=0, row=1, sticky='nsew', padx=10, pady=10)
+                portrait_btn.grid(column=1, row=1, sticky='nsew', padx=10, pady=10)
+                            
+                self.generate_id_card(orientation=orientation.get())
+                
+                show_image(cardport)
+                show_image(self.id_card_image)
+
+                if len(printers) > 0:
+                    print_button.config(command=print_id_card)
+                    printer_list.grid(column=0, row=2, sticky='nsew', padx=10, pady=10, columnspan=2)
+                    print_button.grid(column=0, row=3, sticky="nsew", padx=10, pady=10, columnspan=2)
+                            
+            msg = ttk.Label(master=window)
+            landscape_btn = tk.Radiobutton(window,text='Landscape', padx=20,variable=orientation,value='landscape', command=toggle_radio)
+            portrait_btn = tk.Radiobutton(window,text='Portrait', padx=20,variable=orientation,value='portrait', command=toggle_radio)
+            
+            landscape_btn.select()
+            portrait_btn.deselect()
+
+            #Create some default 'image' that remains ' ghosted behind active id_card_image for some reason.. TODO: Why?
+            #This cardport prevents the window resizing and helps maintain widget alignment.
+            cardport = ImageTk.PhotoImage(Image.new(
+                'RGB', 
+                (
+                    int(self.card_builder.id_card_dimensions_portrait[1]/3),
+                    int(self.card_builder.id_card_dimensions_portrait[1]/3),
+                )
+            ))
+            
+            show_window()
 
 
-    def generate_id_card(self, *args):
+    def generate_id_card(self, orientation, *args):
         '''...'''
-        card_builder = card_gen.IDCardBuilder()
 
-        self.id_card_printable = card_builder.generateIDCard(
+        self.id_card_printable = self.card_builder.generateIDCard(
             #TODO: Change qrcode_id to be one of available Physical IDs, not _id
+            #   Need to consult with Mitch, whether we can instead search for _ids in the 'Phys ID search dialog'
             qrcode_id=self.last_doc['_id'] if '_id' in self.last_doc else 'NILQRCODE',
             embedded_logo_path='assets/embedded-logo.png',
             #TODO: Change barcode_id to be one of available Physical IDs, not _id
+            #   Need to consult with Mitch, whether we can instead search for _ids in the 'Phys ID search dialog'
             barcode_id=self.last_doc['_id'] if '_id' in self.last_doc else 'NILBARCODE',
             name=self.last_doc['Display Name'] if 'Display Name' in self.last_doc else 'UNKNOWN NAME',
             secondary_texts=(
@@ -590,12 +633,11 @@ class DataEntry(SuperWidget):
             tag_text='DEHC 2021',
             logo=Image.open('assets/logo.png'),
             portrait=self.last_photo if self.last_photo is not None else Image.new('RGB', (150,200), (0,0,0)),
-            save_path='data/'+ self.last_doc['_id'] + '.png'
+            save_path='data/'+ self.last_doc['_id'] + '.png',
+            orientation=orientation #Default orientation for trial
         )
         
-        self.id_card_image = ImageTk.PhotoImage(self.id_card_printable)
-
-        self.show_id_window()
+        self.id_card_image = ImageTk.PhotoImage(self.id_card_printable.resize((int(self.id_card_printable.size[0]/3), int(self.id_card_printable.size[1]/3))))
 
 
     def copyid(self, *args):
