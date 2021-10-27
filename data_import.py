@@ -1,6 +1,7 @@
 '''The script that exports data from the CouchDB database to \csv.'''
 
 import argparse
+import ast
 import csv
 import os.path
 import sys
@@ -40,10 +41,15 @@ def read_csv(filename: str):
 
 print("Importing items...")
 for cat in db.schema_cats():
+    schema = db.schema_schema(cat=cat)
+    eval_fields = [field for field, value in schema.items() if value.get('type','') == 'list' and value.get('source','') == 'IDS']
     docs = read_csv(f"items-{cat}")
     ids = []
     for doc in docs:
         id = doc.pop('_id')
+        for field in eval_fields:
+            if doc.get(field,'') != '':
+                doc[field] = ast.literal_eval(doc[field])
         ids.append(id)
     db.items_create(cat=cat, docs=docs, ids=ids)
 
