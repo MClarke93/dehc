@@ -846,6 +846,7 @@ class DataEntry(SuperWidget):
             if img_path != "":
                 img = Image.open(fp=img_path)
                 img.thumbnail(size=self.photomanager.size)
+                self.current_photo = img
                 img = ImageTk.PhotoImage(img)
                 self.w_bu_photo.config(image=img)
                 self.w_bu_photo.image = img
