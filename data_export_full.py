@@ -43,12 +43,20 @@ NAMEFIELD = "Display Name"
 
 
 # TO DO...
-# - Dealing with illegal file names (weird characters, blank names, trim whitespace)
-# - Pretty html document!
+# - Dealing with illegal file names (weird characters)
 
 
 def sanitize_name(name: str):
-    return name
+    new_name = ""
+    for letter in name.strip():
+        if letter in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-~_()[] ':
+            new_name += letter
+        else:
+            new_name += "_"
+    if len(name) > 0:
+        return new_name
+    else:
+        return "_"
 
 
 def write_json(filepath: str, doc: dict):
