@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+import os
 import os.path
 import sys
 
@@ -17,20 +18,26 @@ parser.add_argument('-f','--forc', help="if included, forces the app to use the 
 parser.add_argument('-n','--name', type=str, default="dehc", help="which database namespace to use", metavar="NAME")
 parser.add_argument('-s','--sche', type=str, default="db_schema.json", help="relative path to database schema file", metavar="PATH")
 parser.add_argument('-v','--vers', type=str, default=DBVERSION, help="schema version to expect", metavar="VERS")
+parser.add_argument('-N','--ndir', type=str, default="csv", help="the directory to export the csv files to", metavar="NAME")
 parser.add_argument('-O','--ovdb', help="if included, disables database version detection. Use with caution, as it may result in lost data", action='store_true')
 args = parser.parse_args()
+
 
 db = md.DEHCDatabase(config=args.auth, version=args.vers, forcelocal=args.forc, level="INFO", namespace=args.name, overridedbversion=args.ovdb, schema=args.sche, quickstart=False)
 db.schema_load(schema=args.sche)
 
+BASEDIR = args.ndir
+
 
 def write_csv(filename: str, docs: list, keys: list):
-    filepath = os.path.join("csv", f"{filename}.csv")
+    filepath = os.path.join(BASEDIR, f"{filename}.csv")
     with open(filepath, 'w', newline='') as f:
         writer = csv.DictWriter(f=f, fieldnames=keys, extrasaction='ignore')
         writer.writeheader()
         writer.writerows(docs)
 
+
+os.mkdir(BASEDIR)
 
 print("Exporting items...")
 for cat in db.schema_cats():

@@ -19,8 +19,11 @@ parser.add_argument('-f','--forc', help="if included, forces the app to use the 
 parser.add_argument('-n','--name', type=str, default="dehc", help="which database namespace to use", metavar="NAME")
 parser.add_argument('-s','--sche', type=str, default="db_schema.json", help="relative path to database schema file", metavar="PATH")
 parser.add_argument('-v','--vers', type=str, default=DBVERSION, help="schema version to expect", metavar="VERS")
+parser.add_argument('-N','--ndir', type=str, default="csv", help="the directory to import the csv files from", metavar="NAME")
 parser.add_argument('-O','--ovdb', help="if included, disables database version detection. Use with caution, as it may result in lost data", action='store_true')
 args = parser.parse_args()
+
+BASEDIR = args.ndir
 
 db = md.DEHCDatabase(config=args.auth, version=args.vers, forcelocal=args.forc, level="INFO", namespace=args.name, overridedbversion=args.ovdb, schema=args.sche, quickstart=False)
 db.schema_load(schema=args.sche)
@@ -33,7 +36,7 @@ db.schema_save()
 
 
 def read_csv(filename: str):
-    filepath = os.path.join("csv", f"{filename}.csv")
+    filepath = os.path.join(BASEDIR, f"{filename}.csv")
     with open(filepath, 'r', newline='') as f:
         reader = csv.DictReader(f=f)
         return [row for row in reader]

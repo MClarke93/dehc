@@ -10,7 +10,11 @@ pycache/
 !requirements.txt
 
 # Ignore csv files
+csv/
 *.csv
+
+# Ignore the default export location for export_full
+export/
 
 # Ignore logs except for .log itself
 *.log

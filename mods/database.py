@@ -1555,12 +1555,18 @@ class DEHCDatabase:
         return list(dict.fromkeys(summables))
 
 
-    def time_get(self):
-        '''Retrieves the current server time. Returns None if there's an issue.'''
+    def time_get(self, doc: bool = False):
+        '''Retrieves the current server time. Returns None if there's an issue.
+        
+        doc: If true, returns the raw database document instead of just the time.
+        '''
         try:
-            doc = self.db.document_get(dbname=self.db_configs, id="timecheck", lazy=False)
-            time = doc["Server Time"]
-            return time
+            time_doc = self.db.document_get(dbname=self.db_configs, id="timecheck", lazy=False)
+            if doc == False:
+                time_doc = time_doc["Server Time"]
+                return time_doc
+            else:
+                return time_doc
         except:
             return None
 
