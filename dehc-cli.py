@@ -50,8 +50,20 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
         print("Recursivley flagging %s with %s" % (args.arg1,args.arg2))
         db.flag_assign_tree(args.arg1,args.arg2)
 
+    def orphan():
+        print("Outputting list of orphaned items to orphans.txt")
 
-    commands = {"rflag" : rflag}
+        evacuations = db.items_query(cat="Evacuation", fields=["_id", "Display Name"])
+        if len(evacuations) == 1:
+            base, = evacuations
+        else:
+            raise RuntimeError("Expected one Evacuation in the database.")
+
+        orphans = [line+"\n" for line in db.orphans_list(container=base["_id"])]
+        with open("orphans.txt", "w") as f:
+            f.writelines(orphans)
+
+    commands = {"rflag": rflag, "orphan": orphan}
     commands[args.command]()
 
     logger.info("Application is ending.")

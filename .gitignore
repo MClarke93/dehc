@@ -8,6 +8,7 @@ pycache/
 # Ignore text documents except requirements.txt
 *.txt
 !requirements.txt
+!admin_guide.txt
 
 # Ignore csv files
 csv/

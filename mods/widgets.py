@@ -317,6 +317,8 @@ class DataEntry(SuperWidget):
         self.w_co_cat = ttk.Combobox(master=self.w_fr_foot, values=self.cats, textvariable=self.w_var_cat, state="readonly")
         if self.godmode == True:
             self.w_bu_admin = ttk.Button(master=self.w_fr_foot, text="Admin")
+        else:
+            self.w_bu_help = ttk.Button(master=self.w_fr_foot, text="Help")
         self.w_co_cat.current(0)
 
         self.w_bu_photo.bind("<Double-Button-1>", lambda *_: self.w_bu_edit.invoke())
@@ -334,6 +336,8 @@ class DataEntry(SuperWidget):
             self.w_bu_new.configure(command=self.new)
             if self.godmode == True:
                 self.w_bu_admin.configure(command=self.admin)
+            else:
+                self.w_bu_help.configure(command=self.help)
 
         # Scrollbars
         self.w_sc_flags = ttk.Scrollbar(master=self.w_fr_flags, orient="vertical", command=self.w_li_flags.yview)
@@ -380,8 +384,9 @@ class DataEntry(SuperWidget):
         self.w_bu_new.grid(column=4, row=0, sticky="nsew", padx=(8,1), pady=1)
         self.w_co_cat.grid(column=5, row=0, sticky="nsew", padx=1, pady=1)
         if self.godmode == True:
-            pass
             self.w_bu_admin.grid(column=6, row=0, sticky="nsew", padx=(8,1), pady=1)
+        else:
+            self.w_bu_help.grid(column=6, row=0, sticky="nsew", padx=(8,1), pady=1)
 
 
     def yes_no(self, title: str, message: str, always: bool = False):
@@ -531,6 +536,12 @@ class DataEntry(SuperWidget):
             self.show()
         else:
             self.logger.debug(f"Not reverting data pane, as user declined")
+
+
+    def help(self, *args):
+        '''Callback for when the help button is pressed.'''
+        self.logger.debug(f"Help button activated")
+        webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/dehc/help.html")
 
 
     def show_id_window(self):
