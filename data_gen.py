@@ -10,8 +10,8 @@ import mods.database as md
 
 DBVERSION = "211020B"
 parser = argparse.ArgumentParser(description='Inserts data into the DEHC database.')
-parser.add_argument('persons', type=int, help="number of persons to add to the database", metavar="PERSONS")
-parser.add_argument('vessels', type=int, help="number of vessels to add to the database", metavar="VESSELS")
+parser.add_argument('persons', type=int, nargs='?', default=0, help="number of persons to add to the database", metavar="PERSONS")
+parser.add_argument('vessels', type=int, nargs='?', default=0, help="number of vessels to add to the database", metavar="VESSELS")
 parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
 parser.add_argument('-d','--drop', help="if included, drops databases instead of deleting files from them", action='store_true')
 parser.add_argument('-f','--forc', help="if included, forces the app to use the local copy of the database schema", action='store_true')
