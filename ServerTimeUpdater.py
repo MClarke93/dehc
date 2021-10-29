@@ -28,6 +28,8 @@ config=args.auth
 namespace=args.name 
 db = md.Database(config=config, level=level)
 
+print("DBTime Updater running")
+
 if __name__ == "__main__":
     db_name = namespace + "-configs"
     db.document_delete(db_name,"timecheck", lazy=True)
