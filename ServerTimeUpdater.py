@@ -28,9 +28,6 @@ config=args.auth
 namespace=args.name 
 db = md.Database(config=config, level=level)
 
-def dpdate_time (dbcon,host,db):
-    newtime = datetime.datetime.now().replace(microsecond=0).isoformat()
-
 if __name__ == "__main__":
     db_name = namespace + "-configs"
     db.document_delete(db_name,"timecheck", lazy=True)
@@ -42,4 +39,4 @@ if __name__ == "__main__":
         newtime = datetime.datetime.now().replace(microsecond=0).isoformat()
         doc = {"Server Time": newtime}
         db.document_edit(db_name,doc,"timecheck",lazy=True)
-        time.sleep(15)
+        time.sleep(10)
