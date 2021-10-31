@@ -36,7 +36,7 @@ def busy(func):
             self.root.configure(cursor="clock")
             self.root.update_idletasks() # Redraws screen to reflect changes
             func(self, *args, **kwargs)
-            self.statusbar.w_status.configure(text="Done", background="#dcdad5")
+            self.statusbar.w_status.configure(text=self.statusbar.default, background="#dcdad5")
             self.root.configure(cursor="")
             busystatus = False
     return wrapper
@@ -127,6 +127,7 @@ class StatusBar(SuperWidget):
         super().__init__(master=master, db=db, level=level)
 
         self.root = self.w_fr.winfo_toplevel()
+        self.default = ""
         self.statusbar = self
 
         if prepare == True:
@@ -138,7 +139,7 @@ class StatusBar(SuperWidget):
         self.logger.debug(f"Preparing widgets")
         self.w_status = tk.Label(master=self.w_fr, text="", justify=tk.LEFT, anchor="w", font="Arial 9 bold", background='#dcdad5')
         self.w_time = tk.Label(master=self.w_fr, text="", justify=tk.RIGHT, anchor="e", font="Arial 9 bold", background='#dcdad5')
-        self.update_time()
+        self.update()
 
 
     def _pack_children(self):
@@ -149,12 +150,17 @@ class StatusBar(SuperWidget):
 
 
     @busy
-    def update_time(self):
+    def update(self):
         new_time = self.db.time_get()
         if new_time != None:
             self.logger.debug("Updated Server Time")
             self.w_time.config(text=f"Server Time: {new_time}")
-        self.w_fr.after(ms=15000, func=self.update_time)
+        new_status = self.db.replication_status()
+        if new_status == False:
+            self.default = "Replication error"
+        else:
+            self.default = "Replication working"
+        self.w_fr.after(ms=15000, func=self.update)
 
 
 # ----------------------------------------------------------------------------

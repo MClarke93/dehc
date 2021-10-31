@@ -258,25 +258,37 @@ Read-only mode:
 
 -- STARTING AN APP USING A DIFFERENT COUCHDB DATABASE --------------------
 
-Option 1:
+If you've already set up replication to your local database:
+* In terminal
+  > py main.py -n namespace
+  ...where "namespace" is the database's namespace. If omitted, the
+  namespace is "dehc".
+
+Option 1 for using a remote database directly (no replication):
 * Modify db_auth.json to use the new server's user, pass, url.
 * In terminal:
   > py main.py -n namespace
   ...where "namespace" is the database's namespace. If omitted, the
   namespace is "dehc".
 
-Option 2:
+Option 2 for using a remote database directly (no replication):
 * Create a new .json file containing the new server's user, pass and url.
 * In terminal:
   > py main.py -a new_auth.json -n namespace
   ...where "new_auth.json" is the name of .json you created and
   "namespace" is the database's namespace.
 
-Connecting to VPS:
+E.g. Using VPS, after replication has been set up:
+* Ensure OpenVPN is running and connected (so replication works)
+* In terminal:
+  > py main.py -n vps
+
+Connecting directly to VPS (no replication):
+* Ensure OpenVPN is running and connected
 * In terminal:
   > py main.py -a db_auth_vps_server.json -n vps
 
-Adding -a and -n as shown above works the same for GC and TT.
+Adding -a and/or -n as shown above works the same for GC and TT.
 
 
 -- POPULATING THE DATABASE -----------------------------------------------

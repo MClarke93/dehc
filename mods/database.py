@@ -4,7 +4,6 @@ import base64
 import io
 import json
 import random
-#import time
 
 from ibmcloudant import CouchDbSessionAuthenticator
 from ibmcloudant.cloudant_v1 import CloudantV1, BulkDocs, Document, IndexDefinition, IndexField
@@ -1402,6 +1401,16 @@ class DEHCDatabase:
         docs = self.db.documents_list(dbname=self.db_files, limit=self.limit)
         self.logger.debug(f"Done retrieving all photos")
         return docs
+
+
+    def replication_status(self):
+        '''Returns whether or not the replications on the CouchDB database are all healthy'''
+        docs = self.db.client.get_scheduler_docs().get_result()['docs']
+        for doc in docs:
+            if self.namespace in doc.get("target", ""):
+                if doc.get("state", "error") in ["crashing", "error", "failed", "missing"]:
+                    return False
+        return True
 
 
     def schema_cats(self):
