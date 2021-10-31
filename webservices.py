@@ -53,7 +53,10 @@ allowed_files = ['/qr-code-scanner/tce.png',
     '/qr-code-scanner/package.json',
     '/qr-code-scanner/qr_packed.js',
     '/qr-code-scanner/qrCodeScanner.js',
-    '/qr-code-scanner/styles.css']
+    '/qr-code-scanner/styles.css',
+    '/favicon.ico',
+    '/py104_header.png',
+    '/py104_footer.png']
 
 #parent_path = path = Path(__file__).parent
 
@@ -182,36 +185,58 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(200)            
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(bytes("<html><head><title>Manifest</title></head>", "utf-8"))
-        self.wfile.write(bytes("<table border=1>", "utf-8"))
+        
+        self.wfile.write(bytes("<html><head><title>Manifest</title></head>\r\n", "utf-8"))
+        self.wfile.write(bytes("<div align='center'><img width=100% src ='py104_header.png'></div>\r\n", "utf-8"))        
+        self.wfile.write(bytes("<p><table width = 100% border=2 style='border-collapse:collapse;'>\r\n", "utf-8"))        
+        self.wfile.write(bytes("<tr><td width=20% align=center>Vessel Type (ship/aircraft/train etc)</td><td width=20% align=center>Flight/Voyage/ATO Number</td><td width=20% align=center>Manifest Destination</td><td width=20% align=center>Manifest Number</td><td width=20% align=center>Date</td></tr>\r\n", "utf-8"))
+        self.wfile.write(bytes("<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table></p>", "utf-8"))                
+        self.wfile.write(bytes("<table width = 100% border=2 style='border-collapse:collapse;'>\r\n", "utf-8"))
         evacuees = db.container_children_all(vesselid,cat="Person",result="DOC")
         passenger_num = 0
-        display_fields = ["Title or Rank","Display Name","Passport Number","Passport Expiry","Nationality","Date Of Birth","Sex","Dietary Requirements","Weight (KG)"]
+        display_fields = ["Rank or Title","Display Name","Passport Number","Passport Expiry","Nationality","Date Of Birth","Sex","Dietary Requirements","Weight (KG)"]
         tempstr = "<tr><td>No.</td>"
         for display_field in display_fields:
             tempstr += "<td>%s</td>" % display_field
         tempstr += "<td> LB</td>" 
         tempstr += "</tr>"
         self.wfile.write(bytes(tempstr, "utf-8"))
+        total_weight = 0
+        has_default = False
+
         for evacuee in evacuees:
             passenger_num += 1
             tempstr = "<tr><td>%s</td>" % passenger_num
             for display_field in display_fields:
-                tempstr += "<td>%s</td>" % self.wash_item(display_field,evacuee)
+                if (display_field == "Weight (KG)"):
+                    if (evacuee[display_field] == ""):
+                        rowweight = float(db.schema_schema(cat=evacuee['category'])["Weight (KG)"].get('default', 0))
+                        tempstr += "<td>%s *</td>" % rowweight
+                        has_default = True
+                    else:
+                        rowweight = float(evacuee[display_field])
+                        tempstr += "<td>%s</td>" % rowweight
+                    
+                    total_weight += rowweight
+                    
+                else:
+                    tempstr += "<td>%s</td>" % self.wash_item(display_field,evacuee)
 
             try:
-                tempstr += "<td>%s</td>" % (float(self.wash_item(display_field,evacuee)) * 2.2)
+                tempstr += "<td>%.1f</td>" % (rowweight * 2.2)
             except:
-                tempstr += "<td>&nbsp;</td>"
-
-
+                tempstr += "<td>&nbsp;</td>"        
 
 #            tempstr = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\r\n" %  (passenger_num,self.wash_item("Title or Rank",evacuee),self.wash_item("Display Name",evacuee),self.wash_item("Passport Number",evacuee),self.wash_item("Passport Expiry",evacuee),self.wash_item("Nationality",evacuee),self.wash_item("Date Of Birth",evacuee) )
-            tempstr += "</tr>"
-            self.wfile.write(bytes(tempstr, "utf-8"))
-            
-        self.wfile.write(bytes("</table>", "utf-8"))
-        self.wfile.write(bytes("</body></html>", "utf-8"))
+            tempstr += "</tr>\r\n"
+            self.wfile.write(bytes(tempstr, "utf-8"))            
+        if has_default:        
+            self.wfile.write(bytes("<tr><td colspan=9 align=right>Total Weight<td>%.2f KG*</td><td>%.2f LB*</td></tr>\r\n" % (total_weight , (total_weight*2.2)), "utf-8"))    
+        else:
+            self.wfile.write(bytes("<tr><td colspan=9 align=right>Total Weight<td>%.2f KG</td><td>%.2f LB</td></tr>\r\n" % (total_weight , (total_weight*2.2)), "utf-8"))    
+        self.wfile.write(bytes("</table>\r\n", "utf-8"))        
+        self.wfile.write(bytes("<div align='center'><img width=100% src ='py104_footer.png'></div>\r\n", "utf-8"))        
+        self.wfile.write(bytes("</body></html>\r\n", "utf-8"))
 
 
     def do_GET(self):
