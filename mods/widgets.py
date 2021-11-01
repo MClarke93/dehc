@@ -33,7 +33,6 @@ def busy(func):
         else:
             busystatus = True
             self.statusbar.w_status.configure(text="App is working...", background="#fcf0cf")
-            self.root.configure(cursor="clock")
             self.root.update_idletasks() # Redraws screen to reflect changes
             func(self, *args, **kwargs)
             self.statusbar.w_status.configure(text=self.statusbar.default, background="#dcdad5")
@@ -467,23 +466,28 @@ class DataEntry(SuperWidget):
             id = self.last_doc.get("_id","")
             if id != "":
                 self.db.flag_assign_tree(container=id, flag="Ub-Unboarded")
+            window.destroy()
 
         def buttonb(*args):
             id = self.last_doc.get("_id","")
             if id != "":
                 self.db.flag_revoke_tree(container=id, flag="Ub-Unboarded")
+            window.destroy()
 
         def buttonc(*args):
             id = self.last_doc.get("_id","")
             if id != "":
                 payload = {'vesselid': id}
-                webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/manifest?{urlencode(payload)}")
+                webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/dweb/manifest?{urlencode(payload)}")
+            window.destroy()
 
         def buttond(*args):
             webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/grafana/")
+            window.destroy()
 
         def buttone(*args):
             webbrowser.open(f"https://accdehct1.thecreativeelement.com.au/dscan/")
+            window.destroy()
 
         def onclose(*args):
             self.root.focus_set()
@@ -2071,8 +2075,12 @@ class SearchTree(SuperWidget):
             elif rebase == True:
                 if len(path) > 0:
                     if self.base != path[0]:
-                        new_base = self.db.item_get(id=path[0])
-                        self.base = new_base
+                        try:
+                            new_base = self.db.item_get(id=path[0])
+                        except:
+                            break
+                        else:
+                            self.base = new_base
                         self.logger.debug(f"Rebasing to find node {goal}")
                         self.tree_refresh(selection=goal)
                         continue

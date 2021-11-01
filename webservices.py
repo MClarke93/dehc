@@ -44,7 +44,45 @@ good_sound = base64.b64encode(open('resources/Electronic_Chime-KevanGC-495939803
 level = "DEBUG"
 db = db = md.DEHCDatabase(config=args.auth, version=args.vers, forcelocal=args.forc, level=args.logg, namespace=args.name, overridedbversion=args.ovdb, schema=args.sche, updateschema=args.upda, quickstart=True)
 
+
 # ----------------------------------------------------------------------------
+
+def get_parent_info(item: str):
+    '''Takes an item UUID and returns a DICTIONARY containing various things. See below.'''
+    parent_docs = db.item_parents_all(item=item, result="DOC")
+    parent_docs.reverse()
+
+    parent_ids = []
+    parent_names = []
+    vessel_doc = None
+    vessel_id = None
+    vessel_name = None
+    for doc in parent_docs:
+        id = doc.get("_id", None)
+        name = doc.get("Display Name", None)
+        parent_ids.append(id)
+        parent_names.append(name)
+        if doc.get("category","") == "Vessel":
+            vessel_doc = doc
+            vessel_id = id
+            vessel_name = name
+    parent_map = {uuid: name for uuid, name in zip(parent_ids, parent_names)}
+    parent_path = "/".join(parent_names)
+    
+    response = {
+        "PARENT_DOCS": parent_docs,      # A LIST of the item's parents' documents (DICTIONARIES), from shallowest to deepest.
+        "VESSEL_DOC":  vessel_doc,       # The document (DICTIONARY) of the deepest Vessel that contains the item. None is no vessel.
+        "PARENT_IDS": parent_ids,        # A LIST of the item's parents' database UUIDs (STRINGS), from shallowest to deepest.
+        "VESSEL_ID": vessel_id,          # The database UUID (STRING) of the deepest Vessel that contains the item. None if no vessel.
+        "PARENT_NAMES": parent_names,    # A LIST of the item's parents' Display Names (STRINGS), from shallowest to deepest.
+        "VESSEL_NAME": vessel_name,      # The Display Name (STRING) of the deepest Vessel that contains the item. None if no vessel.
+        "PARENT_MAP": parent_map,        # A mapping (DICTIONARY) of the item's parents' UUIDs and their corresponding Display Names.
+        "PARENT_PATH": parent_path       # The Display Names of the parents as a single STRING, akin to a filepath, from shallowest to deepest.
+    }
+    return response
+
+# ----------------------------------------------------------------------------
+
 
 level = "DEBUG"
 
@@ -84,7 +122,7 @@ class MyServer(BaseHTTPRequestHandler):
         gate_check_html_replace["#photo#"] =   f'<img src="data:image/png;base64, {photo}" alt="Red dot" />'
         gate_check_html_replace["#vessel#"] = ves["Display Name"]
         gate_check_html_replace["#display name#"] = evacuee['Display Name']
-     
+
         html_gate_check_src_copy = html_gate_check_src
         for key,value in gate_check_html_replace.items():
             html_gate_check_src_copy = html_gate_check_src_copy.replace(key,value)
@@ -170,9 +208,6 @@ class MyServer(BaseHTTPRequestHandler):
         else:
             self.wfile.write(bytes(self.gate_check_html_replacer(False,evacuee_data,container_id,"red"), "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
-
-      
-            
 
 
     def wash_item(self,desired,evacuee):
