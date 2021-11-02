@@ -12,7 +12,7 @@ let scanning = false;
 
 qrcode.callback = res => {
   if (res) {
-    outputData.innerText = "https://accdehct1.thecreativeelement.com.au/dweb/lookupuser?physid=" + res;
+    outputData.innerText = "https://accdehct1.thecreativeelement.com.au/dweb/lookupitem?physid=" + res;
     window.open("https://accdehct1.thecreativeelement.com.au/dweb/lookupitem?physid=" + res,"_self")
     scanning = false;
 

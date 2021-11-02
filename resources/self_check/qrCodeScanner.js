@@ -13,7 +13,7 @@ let scanning = false;
 qrcode.callback = res => {
   if (res) {
     outputData.innerText = "https://accdehct1.thecreativeelement.com.au/dweb/selflookup?physid=" + res;
-    window.open("https://accdehct1.thecreativeelement.com.au/dweb/lookupitem?selflookup=" + res,"_self")
+    window.open("https://accdehct1.thecreativeelement.com.au/dweb/selflookup?physid=" + res,"_self")
     scanning = false;
 
     video.srcObject.getTracks().forEach(track => {
