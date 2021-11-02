@@ -36,6 +36,7 @@ args = parser.parse_args()
 
 html_gate_check_src = open('resources/HTML_gate_check.html','r').read()
 html_item_lookup_src = open('resources/HTML_item_lookup.html','r').read()
+html_self_lookup_src = open('resources/HTML_self_lookup.html','r').read()
 
 bad_sound = base64.b64encode(open('resources/Bike Horn-SoundBible.com-602544869.wav','rb').read()).decode("utf-8")
 good_sound = base64.b64encode(open('resources/Electronic_Chime-KevanGC-495939803_mono.wav','rb').read()).decode("utf-8")
@@ -138,6 +139,54 @@ class MyServer(BaseHTTPRequestHandler):
                 cleared_to_evac = True                      
         return cleared_to_evac
 
+    def lookup_self(self,item_id):                
+        self.send_response(200)            
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        
+        
+        item_data = {"Display Name" : "Not Found"} #needs a blank init otherwise it'll throw an error if they aren't in the list
+        try:
+            item_data = db.get_item_by_any_id(item_id)
+            item_id = item_data["_id"]
+            item_path = get_parent_info(item_id)["PARENT_PATH"]
+        except:
+            pass
+
+        try:
+            photo = db.photo_load_base64(item_id)
+        except:
+            photo = ""
+        #pprint(evacuee_data)
+        #pprint(clearance)
+        gate_check_html_replace = {}        
+        gate_check_html_replace["#photo#"] =   f'<img src="data:image/png;base64, {photo}" alt="Red dot" />'
+        gate_check_html_replace["#display name#"] = item_data['Display Name']
+        parent_data = get_parent_info(item_data['_id'])
+        #pprint.pprint(parent_data)
+        data_pane = "<table>\r\n"
+        vessel_name = parent_data.get('VESSEL_NAME',"Not Currently Assigned")
+        try:
+            vessel_depart = parent_data.get('VESSEL_DOC',{}).get('Estimated Departure',"Departure not specified")
+        except:
+            vessel_depart = "" 
+
+        if vessel_depart == "":
+            vessel_depart = "Departure not specified"
+        data_pane += f"<tr><td>Vessel Assigned  </td><td>: {vessel_name}</td></tr>\r\n"
+        data_pane += f"<tr><td>Vessel Departure  </td><td>: {vessel_depart}</td></tr>\r\n"
+        data_pane += "</table>\r\n"
+        
+        gate_check_html_replace["#data list#"] = data_pane
+
+        html_src_copy = html_self_lookup_src
+        for key,value in gate_check_html_replace.items():
+            html_src_copy = html_src_copy.replace(key,value)
+
+        
+        self.wfile.write(bytes(str(html_src_copy), "utf-8"))
+
+
     def lookup_item_html(self,item_id):                
         self.send_response(200)            
         self.send_header("Content-type", "text/html")
@@ -148,6 +197,7 @@ class MyServer(BaseHTTPRequestHandler):
         try:
             item_data = db.get_item_by_any_id(item_id)
             item_id = item_data["_id"]
+            item_path = get_parent_info(item_id)["PARENT_PATH"]
         except:
             pass
 
@@ -158,21 +208,30 @@ class MyServer(BaseHTTPRequestHandler):
         #pprint(evacuee_data)
         #pprint(clearance)
         gate_check_html_replace = {}
+        gate_check_html_replace["#path#"] =   item_path
         gate_check_html_replace["#photo#"] =   f'<img src="data:image/png;base64, {photo}" alt="Red dot" />'
         gate_check_html_replace["#display name#"] = item_data['Display Name']
         data_pane = "<table>"
         for key,value in item_data.items():
             if (type(value) is list) and (key != "flags"): #flags man, who'se idea was that?
-                data_pane += "<table>"
-                data_pane += f"<tr><td rowspan=0>{key}</td><td></td></tr>"
+                data_pane += f"<tr><td><b>{key}</b></td><td><table>"
+                #data_pane += f"<tr><td></td><td></td></tr>\r\n"
                 for subitem in value:
-                    print(subitem)
                     sub_item_data = db.get_item_by_any_id(subitem)
-                    data_pane += f'''<tr><td></td><td><a href="https://10.8.0.50:9000/lookupitem?physid={subitem}">{sub_item_data['Display Name']}</a></td></tr>'''
-                data_pane += "</table>"
+
+                    print(subitem)
+                    try:
+                        photo = db.photo_load_base64(subitem)
+                        data_pane += f'''<tr><td><img src="data:image/png;base64, {photo}" alt="photo_id" /></td>'''
+
+                    except:
+                        data_pane += f'''<tr><td></td>'''
+                                        
+                    data_pane += f'''<td><a href="https://10.8.0.50:9000/lookupitem?physid={subitem}">{sub_item_data['Display Name']}</a></td></tr>\r\n'''
+                data_pane += "</table>\r\n"
             else:
-                data_pane += f"<tr><td>{key}</td><td>{value}</td></tr>"
-        data_pane += "</table>"
+                data_pane += f"<tr><td>{key}</td><td>{value}</td></tr>\r\n"
+        data_pane += "</table></td></tr>\r\n"
         gate_check_html_replace["#data list#"] = data_pane
 
         html_src_copy = html_item_lookup_src
@@ -301,7 +360,16 @@ class MyServer(BaseHTTPRequestHandler):
             #except:
             #    self.send_response(500)
             #    self.end_headers() 
+        elif path == "/selflookup":
+            #print("selflookup")
+            try:
+                self.lookup_self(url_data['physid'][0])
+            except:
+                self.send_response(500)
+                self.end_headers() 
+
         elif path == "/lookupitem":
+            print("Lookupitem")
             try:
                 self.lookup_item_html(url_data['physid'][0])
             except:
