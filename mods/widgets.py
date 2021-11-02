@@ -35,7 +35,7 @@ def busy(func):
             self.statusbar.w_status.configure(text="App is working...", background="#fcf0cf")
             self.root.update_idletasks() # Redraws screen to reflect changes
             func(self, *args, **kwargs)
-            self.statusbar.w_status.configure(text=self.statusbar.default, background="#dcdad5")
+            self.statusbar.w_status.configure(text=self.statusbar.default, background=self.statusbar.default_color)
             self.root.configure(cursor="")
             busystatus = False
     return wrapper
@@ -127,6 +127,7 @@ class StatusBar(SuperWidget):
 
         self.root = self.w_fr.winfo_toplevel()
         self.default = ""
+        self.default_color = "#dcdad5"
         self.statusbar = self
 
         if prepare == True:
@@ -157,8 +158,10 @@ class StatusBar(SuperWidget):
         new_status = self.db.replication_status()
         if new_status == False:
             self.default = "Replication error"
+            self.default_color = "#fccfcf"
         else:
             self.default = "Replication working"
+            self.default_color = "#dcdad5"
         self.w_fr.after(ms=15000, func=self.update)
 
 

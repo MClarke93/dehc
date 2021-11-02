@@ -1310,7 +1310,7 @@ class DEHCDatabase:
         container: The container used as reference.
         '''
         items = [container]+self.container_children_all(container=container)
-        orphans = [item['_id'] for item in self.items_list(fields=["_id"]) if item['_id'] not in items]
+        orphans = [item['_id'] for item in self.items_list(fields=["_id"]) if item['_id'] not in items and "_design/" not in item['_id']]
         return orphans
 
 
