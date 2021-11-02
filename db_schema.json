@@ -1,7 +1,7 @@
 {
     "#":
     {
-        "version": "211020B"
+        "version": "211102"
     },
     "Person":
     {
@@ -23,7 +23,7 @@
             "Destination Contact":               {"type": "text", "required": false},
             "Guardian(s)":                       {"type": "list", "source" : "IDS", "childcat":"Person", "childfield":"Guardian(s)", "required": false},
             "Baggage":                           {"type": "list", "source" : "IDS", "childcat":"Baggage", "childfield":"Owner", "required": false},
-            "Weight (KG)":                       {"type": "read", "source" : "WEIGHT", "default": 82, "regex": "^[0-9]*\\.?[0-9]*$", "required": false},
+            "Weight (KG)":                       {"type": "read", "source" : "WEIGHT", "default": 86.18, "regex": "^[0-9]*\\.?[0-9]*$", "required": false},
             "Authority To Release Information?": {"type": "option", "options":["","Y","N"], "required": false},
             "Accommodation":                     {"type": "text", "required": false},
             "Dietary Requirements":              {"type": "text", "required": false},

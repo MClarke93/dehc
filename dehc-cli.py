@@ -50,6 +50,7 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
         print("Recursivley flagging %s with %s" % (args.arg1,args.arg2))
         db.flag_assign_tree(args.arg1,args.arg2)
 
+
     def orphan():
         print("Outputting list of orphaned items to orphans.txt")
 
@@ -62,6 +63,7 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
         orphans = [line+"\n" for line in db.orphans_list(container=base["_id"])]
         with open("orphans.txt", "w") as f:
             f.writelines(orphans)
+
 
     commands = {"rflag": rflag, "orphan": orphan}
     commands[args.command]()
