@@ -165,6 +165,7 @@ class EMS():
                 self.cm.w_se_top.base = self.db.item_get(id=parent, fields=["_id", "Display Name"])
             if id == self.cm.w_se_bottom.base["_id"]:
                 self.cm.w_se_bottom.base = self.db.item_get(id=parent, fields=["_id", "Display Name"])
+            self.active.w_tr_tree.selection_set(parent)
             self.refresh()
             self.active.tree_focus(goal=parent, rebase=True)
             self.active.tree_open()

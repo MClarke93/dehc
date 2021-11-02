@@ -57,6 +57,11 @@ for cat in db.schema_cats():
             for field in eval_fields:
                 if doc.get(field,'') != '':
                     doc[field] = ast.literal_eval(doc[field])
+            if "Locked" in doc:
+                if doc["Locked"] == "1":
+                    doc["Locked"] = 1
+                else:
+                    doc["Locked"] = 0
             ids.append(id)
         db.items_create(cat=cat, docs=docs, ids=ids)
 

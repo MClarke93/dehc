@@ -1605,6 +1605,7 @@ class SearchTree(SuperWidget):
         self.ctrlheld = False                          # Whether or not the ctrl key is currently being held
         self.autoopen = autoopen                       # The starting value of autoopen
         self.base = base                               # The current base of the tree
+        self.og_base = base                            # The original base of the tree
         self.mindragtime = 0.2                         # The minimum time (in seconds) a drag must last to count
         self.dragstarttime = None                      # The time a drag was started
         self.dragstarttree = None                      # The SearchTree a drag and drop originated from
@@ -2078,9 +2079,8 @@ class SearchTree(SuperWidget):
                         try:
                             new_base = self.db.item_get(id=path[0])
                         except:
-                            break
-                        else:
-                            self.base = new_base
+                            new_base = self.db.item_get(id=goal)
+                        self.base = new_base
                         self.logger.debug(f"Rebasing to find node {goal}")
                         self.tree_refresh(selection=goal)
                         continue
@@ -2089,9 +2089,14 @@ class SearchTree(SuperWidget):
                         self.base = new_base
                         self.tree_refresh(selection=goal)
                 else:
-                    new_base = self.db.item_get(id=goal)
-                    self.base = new_base
-                    self.tree_refresh(selection=goal)
+                    try:
+                        new_base = self.db.item_get(id=goal)
+                        self.base = new_base
+                        self.tree_refresh(selection=goal)
+                    except:
+                        new_base = self.og_base
+                        self.base = new_base
+                        self.tree_refresh(selection=self.og_base.get("_id",None))
             break
 
 
