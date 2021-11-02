@@ -4,6 +4,7 @@ import argparse
 import sys
 
 if sys.version_info.major == 3 and sys.version_info.minor == 9:
+    import apps.baggage as ab
     import apps.ems as ae
     import apps.marshal as am
     import apps.timetable as at
@@ -20,8 +21,9 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
     
     DBVERSION = "211020B"
     parser = argparse.ArgumentParser(description='Starts the Digital Evacuation Handling Center')
-    parser.add_argument('app', nargs="?", default="EMS", help="which app to start: EMS, or GC", choices=['EMS', 'GC', 'TT'], metavar="APP")
-    parser.add_argument('arg', nargs="?", default="", help="if app is GC, this specifies the vessel to gatecheck. If the app is TT, this specifies the container to look for vessels in", metavar="ARG")
+    parser.add_argument('app', nargs="?", default="EMS", help="which app to start: EMS, or GC", choices=['EMS', 'GC', 'TT', 'PB'], metavar="APP")
+    parser.add_argument('arg', nargs="?", default="", help="if app is GC, this specifies the vessel to gatecheck. If the app is TT, this specifies the container to look for vessels in. If the app is PB, this specifies the container to look for bags in", metavar="ARG")
+    parser.add_argument('arg2', nargs="?", default="", help="if the app is PB, this specifies the container to move bags to", metavar="ARG")
     parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
     parser.add_argument('-b','--book', type=str, default="bookmarks.json", help="relative path to EMS screen bookmarks", metavar="PATH")
     parser.add_argument('-f','--forc', help="if included, forces the app to use the local copy of the database schema", action='store_true')
@@ -76,6 +78,13 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
                 at.TT(db=db, container=args.arg, level=args.logg, autorun=True)
         else:
             logger.critical("The container to look for vessels in must be specified")
+    
+    elif args.app == "PB":
+        if args.arg != "" and args.arg != "":
+            if args.xgui == False:
+                ab.PB(db=db, baghold=args.arg, pallet=args.arg2, level=args.logg, autorun=True)
+        else:
+            logger.critical("The container to look for bags in, and the container to move bags to, must both be specified")
 
     logger.info("Application is ending.")
     sys.exit(0)
