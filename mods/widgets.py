@@ -1918,7 +1918,11 @@ class SearchTree(SuperWidget):
         def find(*args):
             self.logger.debug("Scan window's find button activated")
             physid = input_var.get()
-            ids = self.db.ids_find(physid=physid)
+            result = self.db.get_item_by_any_id(physid)
+            if result != False:
+                ids = [result.get("_id","")]
+            else:
+                ids = []
             if len(ids) == 1:
                 self.logger.info(f"Search for physical ID {physid} successful")
                 id, *_ = ids

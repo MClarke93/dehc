@@ -10,7 +10,7 @@ import mods.database as md
 
 # ----------------------------------------------------------------------------
 
-DBVERSION = "211020B"
+DBVERSION = "211102"
 parser = argparse.ArgumentParser(description='Exports data from the DEHC database to \\csv.')
 parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
 parser.add_argument('-d','--dele', help="if included, deletes the files from the existing database before importing", action='store_true')
