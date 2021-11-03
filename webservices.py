@@ -7,7 +7,7 @@ import base64
 import mimetypes
 import mods.database as md
 import mods.log as ml
-
+import os
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse,parse_qs
@@ -286,7 +286,7 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes("<tr><td width=20% align=center>Vessel Type (ship/aircraft/train etc)</td><td width=20% align=center>Flight/Voyage/ATO Number</td><td width=20% align=center>Manifest Destination</td><td width=20% align=center>Manifest Number</td><td width=20% align=center>Date</td></tr>\r\n", "utf-8"))
         self.wfile.write(bytes("<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr></table></p>", "utf-8"))                
         self.wfile.write(bytes("<table width = 100% border=2 style='border-collapse:collapse;'>\r\n", "utf-8"))
-        evacuees = db.container_children_all(vesselid,cat="Person",result="DOC")
+        evacuees = db.container_children_all(vesselid,cat=["Person"],result="DOC")
         passenger_num = 0
         display_fields = ["Rank or Title","Display Name","Passport Number","Passport Expiry","Nationality","Date Of Birth","Sex","Dietary Requirements","Weight (KG)"]
         tempstr = "<tr><td>No.</td>"
@@ -328,7 +328,58 @@ class MyServer(BaseHTTPRequestHandler):
             self.wfile.write(bytes("<tr><td colspan=9 align=right>Total Weight<td>%.2f KG*</td><td>%.2f LB*</td></tr>\r\n" % (total_weight , (total_weight*2.2)), "utf-8"))    
         else:
             self.wfile.write(bytes("<tr><td colspan=9 align=right>Total Weight<td>%.2f KG</td><td>%.2f LB</td></tr>\r\n" % (total_weight , (total_weight*2.2)), "utf-8"))    
-        self.wfile.write(bytes("</table>\r\n", "utf-8"))        
+        self.wfile.write(bytes("</table>\r\n", "utf-8")) 
+
+        self.wfile.write(bytes("<p>Baggage</p>\r\n", "utf-8"))        
+        self.wfile.write(bytes("<table width = 100% border=2 style='border-collapse:collapse;'>\r\n", "utf-8"))        
+        evacuees = db.container_children_all(vesselid,cat=["Baggage"],result="DOC")
+        passenger_num = 0
+        display_fields = ["Owner","Display Name","Description","DG Class","Weight (KG)"]        
+        tempstr = "<tr><td>No.</td>"
+        for display_field in display_fields:
+            tempstr += "<td>%s</td>" % display_field
+        tempstr += "<td> LB</td>" 
+        tempstr += "</tr>"
+        self.wfile.write(bytes(tempstr, "utf-8"))
+        total_weight = 0
+        has_default = False
+
+        for evacuee in evacuees:
+            passenger_num += 1
+            tempstr = "<tr><td>%s</td>" % passenger_num
+            for display_field in display_fields:
+                if (display_field == "Owner"):
+                    if (type(evacuee[display_field]) is list):
+                        sub_item_data = db.get_item_by_any_id(evacuee[display_field][0]) #There can be only one
+                        tempstr += "<td>%s</td>" % sub_item_data["Display Name"] 
+                elif (display_field == "Weight (KG)"):
+                    if (evacuee[display_field] == ""):
+                        rowweight = float(db.schema_schema(cat=evacuee['category'])["Weight (KG)"].get('default', 0))
+                        tempstr += "<td>%s *</td>" % rowweight
+                        has_default = True
+                    else:
+                        rowweight = float(evacuee[display_field])
+                        tempstr += "<td>%s</td>" % rowweight
+                    
+                    total_weight += rowweight
+                    
+                else:
+                    tempstr += "<td>%s</td>" % self.wash_item(display_field,evacuee)
+
+            try:
+                tempstr += "<td>%.1f</td>" % (rowweight * 2.2)
+            except:
+                tempstr += "<td>&nbsp;</td>"        
+
+#            tempstr = "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\r\n" %  (passenger_num,self.wash_item("Title or Rank",evacuee),self.wash_item("Display Name",evacuee),self.wash_item("Passport Number",evacuee),self.wash_item("Passport Expiry",evacuee),self.wash_item("Nationality",evacuee),self.wash_item("Date Of Birth",evacuee) )
+            tempstr += "</tr>\r\n"
+            self.wfile.write(bytes(tempstr, "utf-8"))            
+        if has_default:        
+            self.wfile.write(bytes("<tr><td colspan=5 align=right>Total Weight<td>%.2f KG*</td><td>%.2f LB*</td></tr>\r\n" % (total_weight , (total_weight*2.2)), "utf-8"))    
+        else:
+            self.wfile.write(bytes("<tr><td colspan=5 align=right>Total Weight<td>%.2f KG</td><td>%.2f LB</td></tr>\r\n" % (total_weight , (total_weight*2.2)), "utf-8"))    
+        self.wfile.write(bytes("</table>\r\n", "utf-8")) 
+
         self.wfile.write(bytes("<div align='center'><img width=100% src ='py104_footer.png'></div>\r\n", "utf-8"))        
         self.wfile.write(bytes("</body></html>\r\n", "utf-8"))
 
@@ -381,8 +432,10 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(200)            
                 self.send_header("Content-type", mimetypes.guess_type(path))
                 self.end_headers()   
-
-                self.wfile.write(bytes(open('resources/' + path,'rb').read()))            
+                print(os.getcwd())
+                print(os.path.join(os.getcwd(),"resources",path[1:]))
+                #os.path.join(,"resources", path)
+                self.wfile.write(bytes(open(os.path.join(os.getcwd(),"resources",path[1:]),'rb').read()))
             #except:
             #    self.send_response(500)            
             #    self.end_headers()            
