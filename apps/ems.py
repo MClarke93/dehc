@@ -44,7 +44,7 @@ class EMS():
             self.cats.remove("Vessel")
 
         self.root = tk.Tk()
-        self.root.title(f"EMS ({self.db.namespace} @ {self.db.db.data['url']})")
+        self.root.title(f"EMS ({self.db.namespace} @ {self.db.db.data['url']}, Version {self.db.version})")
         self.root.state('zoomed')
         self.root.configure(background="#dcdad5")
 

@@ -18,7 +18,7 @@ from datetime import datetime
 
 # ----------------------------------------------------------------------------
 
-DBVERSION = "211102"
+DBVERSION = "RC1"
 
 def count_people(indata):
     total_people = 0

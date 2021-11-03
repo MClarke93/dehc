@@ -15,7 +15,7 @@ from urllib.parse import urlparse,parse_qs
 import time
 import pprint
 
-DBVERSION = "211102"
+DBVERSION = "RC1"
 hostName = "0.0.0.0"
 hostPort = 9000
 

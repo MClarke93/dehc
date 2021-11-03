@@ -1469,7 +1469,7 @@ class DEHCDatabase:
         
         schema: Path to local .json file containing database schema.
         '''
-        id = "schema/"+self.version
+        id = "schema"
         self.logger.debug(f"Loading database schema {id}")
 
         if self.forcelocal == False and self.db.document_exists(dbname=self.db_configs, id=id) == True:
@@ -1530,7 +1530,7 @@ class DEHCDatabase:
 
     def schema_save(self):
         '''Saves database schema to the database.'''
-        id = "schema/"+self.version
+        id = "schema"
         self.logger.info(f"Saving database schema {id}")
         if self.db.document_exists(dbname=self.db_configs, id=id):
             self.db.document_edit(dbname=self.db_configs, doc=self.schema, id=id)
