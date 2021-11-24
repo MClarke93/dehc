@@ -17,7 +17,7 @@ q = 20           # Number of queries to make
 
 dehc = md.DEHCDatabase(
     config="db_auth.json", 
-    version="RC1", 
+    version="20211125", 
     forcelocal=True, 
     level="CRITICAL",
     namespace="test",

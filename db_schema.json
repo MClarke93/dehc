@@ -1,34 +1,34 @@
 {
     "#":
     {
-        "version": "RC1"
+        "version": "20211125"
     },
     "Person":
     {
         "fields":
         {
-            "Display Name":                      {"type": "text", "required": true},
-            "Physical ID":                       {"type": "list", "source": "PHYSIDS", "required": false},
-            "Title or Rank":                     {"type": "option", "options":["","MR","MRS","MS","MISS","MX","DR","ADML","VADM","RADM","CDRE","CAPT","CMDR","LCDR","LEUT","SBLT","MIDN","WO","CPO","PO","LS","AB","SMN","GEN","LTGEN","MAJGEN","BRIG","COL","LTCOL","MAJ","LT","2LT","WO1","WO2","SSGT","SGT","CPL","BDR","LCPL","LBDR","PTE(P)","PTE","CFN","TPR","GNR","SPR","SIG","MUSN","SCDT","OCDT","CHAP","CHAP1","CHAP2","CHAP3","CHAP4","CHAP5","ACM","AIRMSHL","AVM","AIRCDRE","GPCAPT","WGCDR","SQNLDR","FLTLT","FLGOFF","PLTOFF","OFFCDT","WOFF","FSGT","LAC","LACW","AC","ACW","ACR","ACWR"], "required": false},
-            "Family Name":                       {"type": "text", "required": false},
-            "Given Name(s)":                     {"type": "text", "required": false},
-            "Sex":                               {"type": "option", "options":["","M","F","X"], "required": false},
-            "Date Of Birth":                     {"type": "text", "required": false},
-            "Passport Number":                   {"type": "text", "required": false},
-            "Passport Expiry":                   {"type": "text", "required": false},
-            "Nationality":                       {"type": "text", "required": false},
-            "Home Address":                      {"type": "text", "required": false},
-            "Destination Address":               {"type": "text", "required": false},
-            "Home Contact":                      {"type": "text", "required": false},
-            "Destination Contact":               {"type": "text", "required": false},
-            "Guardian(s)":                       {"type": "list", "source" : "IDS", "childcat":"Person", "childfield":"Guardian(s)", "required": false},
-            "Baggage":                           {"type": "list", "source" : "IDS", "childcat":"Baggage", "childfield":"Owner", "required": false},
-            "Weight (KG)":                       {"type": "read", "source" : "WEIGHT", "default": 86.18, "regex": "^[0-9]*\\.?[0-9]*$", "required": false},
-            "Authority To Release Information?": {"type": "option", "options":["","Y","N"], "required": false},
-            "Accommodation":                     {"type": "text", "required": false},
-            "Dietary Requirements":              {"type": "text", "required": false},
-            "Notes":                             {"type": "multitext", "required": false},
-            "Locked":                            {"type": "lock", "required": false}
+            "Display Name":                      {"type": "text", "required": 1},
+            "Physical ID":                       {"type": "list", "source": "PHYSIDS", "required": 0},
+            "Title or Rank":                     {"type": "option", "options":["","MR","MRS","MS","MISS","MX","DR","ADML","VADM","RADM","CDRE","CAPT","CMDR","LCDR","LEUT","SBLT","MIDN","WO","CPO","PO","LS","AB","SMN","GEN","LTGEN","MAJGEN","BRIG","COL","LTCOL","MAJ","LT","2LT","WO1","WO2","SSGT","SGT","CPL","BDR","LCPL","LBDR","PTE(P)","PTE","CFN","TPR","GNR","SPR","SIG","MUSN","SCDT","OCDT","CHAP","CHAP1","CHAP2","CHAP3","CHAP4","CHAP5","ACM","AIRMSHL","AVM","AIRCDRE","GPCAPT","WGCDR","SQNLDR","FLTLT","FLGOFF","PLTOFF","OFFCDT","WOFF","FSGT","LAC","LACW","AC","ACW","ACR","ACWR"], "required": 0},
+            "Family Name":                       {"type": "text", "required": 2},
+            "Given Name(s)":                     {"type": "text", "required": 2},
+            "Sex":                               {"type": "option", "options":["","M","F","X"], "required": 0},
+            "Date Of Birth":                     {"type": "text", "required": 0},
+            "Passport Number":                   {"type": "text", "required": 2},
+            "Passport Expiry":                   {"type": "text", "required": 0},
+            "Nationality":                       {"type": "text", "required": 0},
+            "Home Address":                      {"type": "text", "required": 0},
+            "Destination Address":               {"type": "text", "required": 0},
+            "Home Contact":                      {"type": "text", "required": 0},
+            "Destination Contact":               {"type": "text", "required": 0},
+            "Guardian(s)":                       {"type": "list", "source" : "IDS", "childcat":"Person", "childfield":"Guardian(s)", "required": 0},
+            "Baggage":                           {"type": "list", "source" : "IDS", "childcat":"Baggage", "childfield":"Owner", "required": 0},
+            "Weight (KG)":                       {"type": "read", "source" : "WEIGHT", "default": 86.18, "regex": "^[0-9]*\\.?[0-9]*$", "required": 0},
+            "Authority To Release Information?": {"type": "option", "options":["","Y","N"], "required": 0},
+            "Accommodation":                     {"type": "text", "required": 0},
+            "Dietary Requirements":              {"type": "text", "required": 0},
+            "Notes":                             {"type": "multitext", "required": 0},
+            "Locked":                            {"type": "lock", "required": 0}
         },
         "flags": ["Be-Belligerent","Bl-Blacklisted","Ci-CIST","Df-DFAT Cleared","Im-Impaired Vision/Hearing","Md-Medical","Ml-Multilingual","Ms-Missing","Ne-Non-English Speaking","Pa-Physical Assistance","Ub-Unboarded","Um-Unaccompanied Minor"],
         "keys": ["Display Name"]
@@ -37,11 +37,11 @@
     {
         "fields":
         {
-            "Display Name": {"type": "text", "required": true},
-            "Weight (KG)":  {"type": "sum",  "cat": ["Person", "Baggage"], "target": "Weight (KG)", "required": false},
-            "Souls":        {"type": "count", "cat": ["Person"], "required": false},
-            "Notes":        {"type": "multitext", "required": false},
-            "Locked":       {"type": "lock", "required": false}
+            "Display Name": {"type": "text", "required": 1},
+            "Weight (KG)":  {"type": "sum",  "cat": ["Person", "Baggage"], "target": "Weight (KG)", "required": 0},
+            "Souls":        {"type": "count", "cat": ["Person"], "required": 0},
+            "Notes":        {"type": "multitext", "required": 0},
+            "Locked":       {"type": "lock", "required": 0}
         },
         "flags": [],
         "keys": ["Display Name"]
@@ -50,17 +50,17 @@
     {
         "fields":
         {
-            "Display Name":       {"type": "text", "required": true},
-            "Physical ID":        {"type": "list",  "source": "PHYSIDS", "required": false},
-            "Owner":              {"type": "list", "source" : "IDS", "childcat":"Baggage", "childfield":"Owner", "required": false},
-            "Number of Pieces":   {"type": "text", "required": false},
-            "Description":        {"type": "text", "required": false},
-            "Priority":           {"type": "option", "options": ["", "High", "Medium", "Low"], "required": false},
-            "Consignment Number": {"type": "text", "required": false},
-            "Weight (KG)":        {"type": "read", "source": "WEIGHT", "default": 50, "regex": "^[0-9]*\\.?[0-9]*$", "required": false},
-            "DG Class":           {"type": "option", "options": ["", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "2.1", "2.2", "2.3", "3", "4.1", "4.2", "4.3", "5.1", "5.2", "6.1", "6.2", "7", "8", "9.I", "9.II", "9.III"], "required": false},
-            "Notes":              {"type": "multitext", "required": false},
-            "Locked":             {"type": "lock", "required": false}
+            "Display Name":       {"type": "text", "required": 1},
+            "Physical ID":        {"type": "list",  "source": "PHYSIDS", "required": 0},
+            "Owner":              {"type": "list", "source" : "IDS", "childcat":"Baggage", "childfield":"Owner", "required": 0},
+            "Number of Pieces":   {"type": "text", "required": 0},
+            "Description":        {"type": "text", "required": 0},
+            "Priority":           {"type": "option", "options": ["", "High", "Medium", "Low"], "required": 0},
+            "Consignment Number": {"type": "text", "required": 0},
+            "Weight (KG)":        {"type": "read", "source": "WEIGHT", "default": 50, "regex": "^[0-9]*\\.?[0-9]*$", "required": 0},
+            "DG Class":           {"type": "option", "options": ["", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "2.1", "2.2", "2.3", "3", "4.1", "4.2", "4.3", "5.1", "5.2", "6.1", "6.2", "7", "8", "9.I", "9.II", "9.III"], "required": 0},
+            "Notes":              {"type": "multitext", "required": 0},
+            "Locked":             {"type": "lock", "required": 0}
         },
         "flags": ["Ms-Missing"],
         "keys": ["Display Name"]
@@ -69,24 +69,24 @@
     {
         "fields":
         {
-            "Display Name":        {"type": "text", "required": true},
-            "Callsign":            {"type": "text", "required": false},
-            "Travel Type":         {"type": "option", "options": ["", "Domestic", "International"], "required": false},
-            "Vessel Type":         {"type": "text", "required": false},
-            "Estimated Arrival":   {"type": "text", "required": false},
-            "Actual Arrival":      {"type": "text", "required": false},
-            "Estimated Departure": {"type": "text", "required": false},
-            "Actual Departure":    {"type": "text", "required": false},
-            "Origin":              {"type": "text", "required": false},
-            "Destination":         {"type": "text", "required": false},
-            "Capacity (KG)":       {"type": "text", "regex": "^[0-9]*\\.?[0-9]*$", "required": false},
-            "Weight (KG)":         {"type": "sum",  "cat": ["Person", "Baggage"], "target": "Weight (KG)", "required": false},
-            "Lat":                 {"index": 1, "type": "text", "required": false},
-            "Lon":                 {"index": 1, "type": "text", "required": false},                        
-            "Capacity (Souls)":    {"index": 1, "type": "text", "regex": "^[0-9]*$", "required": false},              
-            "Souls":               {"type": "count", "cat": ["Person"], "required": false},
-            "Notes":               {"type": "multitext", "required": false},
-            "Locked":              {"type": "lock", "required": false}
+            "Display Name":        {"type": "text", "required": 1},
+            "Callsign":            {"type": "text", "required": 0},
+            "Travel Type":         {"type": "option", "options": ["", "Domestic", "International"], "required": 0},
+            "Vessel Type":         {"type": "text", "required": 0},
+            "Estimated Arrival":   {"type": "text", "required": 0},
+            "Actual Arrival":      {"type": "text", "required": 0},
+            "Estimated Departure": {"type": "text", "required": 0},
+            "Actual Departure":    {"type": "text", "required": 0},
+            "Origin":              {"type": "text", "required": 0},
+            "Destination":         {"type": "text", "required": 0},
+            "Capacity (KG)":       {"type": "text", "regex": "^[0-9]*\\.?[0-9]*$", "required": 0},
+            "Weight (KG)":         {"type": "sum",  "cat": ["Person", "Baggage"], "target": "Weight (KG)", "required": 0},
+            "Lat":                 {"index": 1, "type": "text", "required": 0},
+            "Lon":                 {"index": 1, "type": "text", "required": 0},                        
+            "Capacity (Souls)":    {"index": 1, "type": "text", "regex": "^[0-9]*$", "required": 0},              
+            "Souls":               {"type": "count", "cat": ["Person"], "required": 0},
+            "Notes":               {"type": "multitext", "required": 0},
+            "Locked":              {"type": "lock", "required": 0}
         },
         "flags": ["Re-Ready To Board","Pv-Publicly Visible"],
         "keys": ["Display Name"]
@@ -95,14 +95,14 @@
     {
         "fields":
         {
-            "Display Name":         {"type": "text", "required": true},
-            "Responsible":          {"type": "text", "required": false},
-            "Souls":                {"type": "count", "cat": ["Person"], "required": false},
-            "Lat":                  {"index": 1, "type": "text", "required": false},
-            "Lon":                  {"index": 1, "type": "text", "required": false},                        
-            "Capacity (Souls)":     {"index": 1, "type": "text", "regex": "^[0-9]*$", "required": false},                 
-            "Notes":                {"type": "multitext", "required": false},            
-            "Locked":               {"type": "lock", "required": false}
+            "Display Name":         {"type": "text", "required": 1},
+            "Responsible":          {"type": "text", "required": 0},
+            "Souls":                {"type": "count", "cat": ["Person"], "required": 0},
+            "Lat":                  {"index": 1, "type": "text", "required": 0},
+            "Lon":                  {"index": 1, "type": "text", "required": 0},                        
+            "Capacity (Souls)":     {"index": 1, "type": "text", "regex": "^[0-9]*$", "required": 0},                 
+            "Notes":                {"type": "multitext", "required": 0},            
+            "Locked":               {"type": "lock", "required": 0}
         },
         "flags": [],
         "keys": ["Display Name"]
@@ -111,14 +111,14 @@
     {
         "fields":
         {
-            "Display Name":     {"type": "text", "required": true},
-            "Responsible":      {"type": "text", "required": false},
-            "Souls":            {"type": "count", "cat": ["Person"], "required": false},
-            "Lat":              {"index": 1, "type": "text", "required": false},
-            "Lon":              {"index": 1, "type": "text", "required": false},                        
-            "Capacity (Souls)": {"index": 1, "type": "text", "regex": "^[0-9]*$", "required": false},                  
-            "Notes":            {"type": "multitext", "required": false},
-            "Locked":           {"type": "lock", "required": false}
+            "Display Name":     {"type": "text", "required": 1},
+            "Responsible":      {"type": "text", "required": 0},
+            "Souls":            {"type": "count", "cat": ["Person"], "required": 0},
+            "Lat":              {"index": 1, "type": "text", "required": 0},
+            "Lon":              {"index": 1, "type": "text", "required": 0},                        
+            "Capacity (Souls)": {"index": 1, "type": "text", "regex": "^[0-9]*$", "required": 0},                  
+            "Notes":            {"type": "multitext", "required": 0},
+            "Locked":           {"type": "lock", "required": 0}
         },
         "flags": [],
         "keys": ["Display Name"]
@@ -127,10 +127,10 @@
     {
         "fields":
         {
-            "Display Name": {"type": "text", "required": true},
-            "Responsible":  {"type": "text", "required": false},
-            "Notes":        {"type": "multitext", "required": false},
-            "Locked":       {"type": "lock", "required": false}
+            "Display Name": {"type": "text", "required": 1},
+            "Responsible":  {"type": "text", "required": 0},
+            "Notes":        {"type": "multitext", "required": 0},
+            "Locked":       {"type": "lock", "required": 0}
         },
         "flags": [],
         "keys": ["Display Name"]
@@ -139,8 +139,8 @@
     {
         "fields":
         {
-            "Display Name": {"type": "text", "required": true},
-            "Locked":       {"type": "lock", "required": false}
+            "Display Name": {"type": "text", "required": 1},
+            "Locked":       {"type": "lock", "required": 0}
         },
         "flags": [],
         "keys": ["Display Name"]

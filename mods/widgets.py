@@ -1238,7 +1238,10 @@ class DataEntry(SuperWidget):
         doc = self.last_doc
         physid = None
         schema = self.db.schema_schema(cat=self.last_doc["category"])
+        
+        warnings = []
         for index, (field, info) in enumerate(schema.items()):
+            
             if self.w_hidden_data[index] == None:
                 if info.get('type','') == 'multitext':
                     value = self.w_input_data[index].get("1.0","end").rstrip()
@@ -1250,21 +1253,37 @@ class DataEntry(SuperWidget):
                     value = ""
                 else:
                     value = self.w_hidden_data[index]
-            if info['required'] == True and value == "":
+            
+            if info['required'] == 2 and value == "":
+                warnings.append(field)
+
+            if info['required'] == 1 and value == "":
                 messagebox.showwarning("Missing Information", f"Could not save item because required field \"{field}\" is empty.")
                 self.logger.warning(f"Could not save item because required field \"{field}\" is empty")
                 break
+            
             regex = info.get('regex', None)
             if regex != None:
                 if not re.match(regex, value):
                     messagebox.showwarning("Incorrect Information", f"Could not save item because field \"{field}\" fails validation.")
-                    self.logger.warning(f"Could not save item because field \"{field}\" fails validation.")
+                    self.logger.warning(f"Could not save item because field \"{field}\" fails validation")
                     break
             doc[field] = value
+        
         else:
+            if len(warnings) > 0:
+                if len(warnings) == 1:
+                    accept = self.yes_no("Missing Information", f"{warnings[0]} is empty. Are you sure you want to save?", always=True)
+                else:
+                    accept = self.yes_no("Missing Information", f"{', '.join(warnings)} are empty. Are you sure you want to save?", always=True)
+                if accept == False:
+                    self.logger.debug("Did not save, as some important fields were empty and the user declined")
+                    return False
+
             self.editing = False
             self.logger.info(f"Edit mode set to {self.editing}")
             doc["flags"] = list(self.w_li_flags.get(0, "end"))
+            
             if "_id" in doc:
                 self.logger.info(f"Editing {doc['category']} {doc['_id']}")
                 self.db.item_edit(id=doc["_id"], data=doc)
@@ -1273,13 +1292,16 @@ class DataEntry(SuperWidget):
                 self.logger.info(f"Saving new {doc['category']}")
                 doc["_id"] = self.db.item_create(cat=doc["category"], doc=doc)
                 id = doc["_id"]
+            
             if physid != None:
                 self.db.ids_edit(item=doc["_id"], ids=physid)
+            
             if self.current_photo != None:
                 self.db.photo_save(item=doc["_id"], img=self.current_photo)
             else:
                 if self.last_photo != None:
                     self.db.photo_delete(item=doc["_id"])
+            
             if self._save != None:
                 self._save(id)
             self.back_doc = self.last_doc
@@ -1288,6 +1310,7 @@ class DataEntry(SuperWidget):
             self.w_bu_cancel.invoke()
             self.logger.info("Save completed")
             return True
+        
         return False
 
 
