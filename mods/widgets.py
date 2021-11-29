@@ -191,23 +191,24 @@ class DataEntry(SuperWidget):
         self.editing = False                   # Whether or not the user is currently editing a document.
         self.back_doc = {}                     # The document to return to when the back button is pressed.
         self.last_doc = {}                     # The most recently selected and retrieved document from the database.
-        self.godmode = godmode                 # Whether or not the application is in 'god mode' (admin mode)
+        self.godmode = godmode                 # Whether or not the application is in 'god mode' (admin mode).
         self.guardian_doc = {}                 # The guardian's document when 'new child' is pressed.
         self.child_doc = {}                    # Information for child document when 'new child' is pressed.
         self.current_photo = None              # The currently slown photo.
         self.last_photo = None                 # The most recently retrieved photo from the database.
-        self.level = level                     # The logging level
-        self.readonly = readonly               # Whether or not the application is in readonly mode
-        self.root = self.w_fr.winfo_toplevel() # Root widget that contains this SuperWidget
-        self.statusbar = statusbar             # The status bar associated with this DataEntry
-        self.summation = False                 # Whether or not the DataEntry will show summable fields
-        self.trash = trash                     # The UUID of the recycle bin
-        self.web = web                         # The filepath to the web server authentication file
+        self.level = level                     # The logging level.
+        self.readonly = readonly               # Whether or not the application is in readonly mode.
+        self.root = self.w_fr.winfo_toplevel() # Root widget that contains this SuperWidget.
+        self.statusbar = statusbar             # The status bar associated with this DataEntry.
+        self.subwindow_edited = False          # Whether or not the current subwindow has been edited.
+        self.summation = False                 # Whether or not the DataEntry will show summable fields.
+        self.trash = trash                     # The UUID of the recycle bin.
+        self.web = web                         # The filepath to the web server authentication file.
         self._delete = delete                  # The parent object's callback to run when delete is pressed.
         self._newchild = newchild              # The parent object's callback to run when new child is pressed.
         self._save = save                      # The parent object's callback to run when save is pressed.
         self._show = show                      # The parent object's callback to run when show is pressed.
-        self.hardware = hardware               # The hardware manager object associated with this DataEntry
+        self.hardware = hardware               # The hardware manager object associated with this DataEntry.
         
         self.photomanager = mp.PhotoManager(level=self.level)
         self.photo_blank = Image.new("RGB", (256, 256), (220, 218, 213))
@@ -1031,6 +1032,8 @@ class DataEntry(SuperWidget):
             window.title(field.cget("text"))
             window.configure(background="#D9D9D9")
 
+            self.subwindow_edited = False
+
             if source == "IDS":
                 self.logger.debug(f"Read source is IDS")
                 cur_id = self.last_doc.get("_id","")
@@ -1047,6 +1050,7 @@ class DataEntry(SuperWidget):
                     if name not in namelist.get(0, "end"):
                         listids.append(id)
                         namelist.insert("end", name)
+                        self.subwindow_edited = True
                         self.logger.info(f"Added {id} / {name} to ID name list")
                     else:
                         self.logger.debug(f"Did not add {id} / {name} to ID name list, as it was already there")
@@ -1059,6 +1063,7 @@ class DataEntry(SuperWidget):
                         index, *_ = indexes
                         id = listids.pop(index)
                         namelist.delete(index)
+                        self.subwindow_edited = True
                         self.logger.info(f"Removed {id} from ID name list")
                     else:
                         self.logger.debug(f"Did not remove any IDs from name list, as nothing was selected")
@@ -1072,13 +1077,15 @@ class DataEntry(SuperWidget):
                         entry.current(0)
                     self.w_hidden_data[row] = listids
                     self.logger.info(f"Pushed ids to date pane: {listids} / {values}")
+                    self.subwindow_edited == False
                     window.destroy()
                     self.logger.debug(f"List field's read window closed")
                     self.data_change()
 
                 def onclose(*args):
-                    self.root.focus_set()
-                    window.destroy()
+                    if self.subwindow_edited == False or self.yes_no("Unsaved Changes", "There are unsaved changes. Are you sure you want to close this window?", True) == True:
+                        self.root.focus_set()
+                        window.destroy()
 
                 window.protocol("WM_DELETE_WINDOW", onclose)
 
@@ -1123,6 +1130,7 @@ class DataEntry(SuperWidget):
                     if id not in idlist.get(0, "end") and len(id) > 0:
                         idlist.insert("end", id)
                         identry.delete(0, "end")
+                        self.subwindow_edited = True
                         self.logger.info(f"Added {id} to physical ID list")
                         identry.focus_set()
                     else:
@@ -1135,6 +1143,7 @@ class DataEntry(SuperWidget):
                     if len(indexes) > 0:
                         index, *_ = indexes
                         idlist.delete(index)
+                        self.subwindow_edited = True
                         self.logger.info(f"Deleted physical ID at index {index}")
                     else:
                         self.logger.debug(f"Did not delete physical ID, as none were selected")
@@ -1172,13 +1181,15 @@ class DataEntry(SuperWidget):
                         entry.current(0)
                     self.w_hidden_data[row] = values
                     self.logger.info(f"Pushed physical ids to date pane: {values}")
+                    self.subwindow_edited == False
                     window.destroy()
                     self.logger.debug(f"List field's read window closed")
                     self.data_change()
 
                 def onclose(*args):
-                    self.root.focus_set()
-                    window.destroy()
+                    if self.subwindow_edited == False or self.yes_no("Unsaved Changes", "There are unsaved changes. Are you sure you want to close this window?", True) == True:
+                        self.root.focus_set()
+                        window.destroy()
 
                 window.protocol("WM_DELETE_WINDOW", onclose)
 

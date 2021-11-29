@@ -21,7 +21,7 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
     
     DBVERSION = "20211125"
     parser = argparse.ArgumentParser(description='Starts the Digital Evacuation Handling Center')
-    parser.add_argument('app', nargs="?", default="EMS", help="which app to start: EMS, or GC", choices=['EMS', 'GC', 'TT', 'PB'], metavar="APP")
+    parser.add_argument('app', nargs="?", default="EMS", help="which app to start: EMS, GC, TT or PB", choices=['EMS', 'GC', 'TT', 'PB'], metavar="APP")
     parser.add_argument('arg', nargs="?", default="", help="if app is GC, this specifies the vessel to gatecheck. If the app is TT, this specifies the container to look for vessels in. If the app is PB, this specifies the container to look for bags in", metavar="ARG")
     parser.add_argument('arg2', nargs="?", default="", help="if the app is PB, this specifies the container to move bags to", metavar="ARG")
     parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
