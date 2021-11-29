@@ -8,7 +8,7 @@ import mods.database as md
 
 # ----------------------------------------------------------------------------
 
-DBVERSION = "20211125"
+DBVERSION = "20211130"
 parser = argparse.ArgumentParser(description='Inserts data into the DEHC database.')
 parser.add_argument('persons', type=int, nargs='?', default=0, help="number of persons to add to the database", metavar="PERSONS")
 parser.add_argument('vessels', type=int, nargs='?', default=0, help="number of vessels to add to the database", metavar="VESSELS")
@@ -101,6 +101,7 @@ def create_person(**kwargs):
         "Destination Contact": destcon,
         "Weight (KG)": weight,
         "Authority To Release Information?": atri,
+        "Souls": "1",
     }
     provided = {field: value for field, value in kwargs.items()}
     doc.update(provided)

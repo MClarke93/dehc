@@ -407,7 +407,7 @@ class DataEntry(SuperWidget):
         '''
         if self.editing == True or always == True:
             self.logger.info(f"Asked {repr(message)} ...")
-            answer = messagebox.askyesno(title=title, message=message)
+            answer = messagebox.askyesno(title=title, message=message, default="no")
             if answer == True:
                 if always == False:
                     self.editing = False
@@ -1521,6 +1521,17 @@ class DataEntry(SuperWidget):
                     buttonb = None
                     buttonc = None
                     hidden = ""
+                
+                elif w_type == "readonly":
+                    entry = ttk.Entry(master=self.w_fr_data, textvariable=var)
+                    if self.last_doc.get('_id','') == '':
+                        entry.insert(0, info.get('default',''))
+                        self.editing = False
+                    entry.config(state="disabled")
+                    buttona = None
+                    buttonb = None
+                    buttonc = None
+                    hidden = ""
 
                 else:
                     entry = ttk.Label(master=self.w_fr_data)
@@ -2333,7 +2344,7 @@ class SearchTree(SuperWidget):
                                     items.append(float(value))
                                 except:
                                     items.append(0.0)
-                        itemsum = f"{sum(items):.1f}" if len(items) > 0 else ""
+                        itemsum = f"{sum(items):.0f}" if len(items) > 0 else ""
                     
                     # Count fields
                     elif info['type'] == "count":
@@ -2346,7 +2357,7 @@ class SearchTree(SuperWidget):
                         if value == "":
                             value = info.get('default', 0)
                             defaulted = True
-                        itemsum = f"{float(value):.1f}"
+                        itemsum = f"{float(value):.0f}"
                     
                     # Display sum
                     if defaulted == True:

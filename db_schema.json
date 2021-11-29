@@ -1,7 +1,7 @@
 {
     "#":
     {
-        "version": "20211125"
+        "version": "20211130"
     },
     "Person":
     {
@@ -27,6 +27,7 @@
             "Authority To Release Information?": {"type": "option", "options":["","Y","N"], "required": 0},
             "Accommodation":                     {"type": "text", "required": 0},
             "Dietary Requirements":              {"type": "text", "required": 0},
+            "Souls":                             {"type": "readonly", "default": 1},
             "Notes":                             {"type": "multitext", "required": 0},
             "Locked":                            {"type": "lock", "required": 0}
         },
