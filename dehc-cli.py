@@ -14,7 +14,7 @@ else:
 
 if __name__ == "__main__": # Multiprocessing library complains if this guard isn't used
     
-    DBVERSION = "20211130"
+    DBVERSION = "20211131"
     parser = argparse.ArgumentParser(description='DEHC cli tools')
     parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
     parser.add_argument('-f','--forc', help="if included, forces the app to use the local copy of the database schema", action='store_true')

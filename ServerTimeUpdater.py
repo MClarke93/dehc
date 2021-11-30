@@ -8,7 +8,7 @@ import datetime
 import time
 import mods.database as md
 
-DBVERSION = "20211130"
+DBVERSION = "20211131"
 parser = argparse.ArgumentParser(description='Starts the Digital Evacuation Handling Center')
 parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
 parser.add_argument('-b','--book', type=str, default="bookmarks.json", help="relative path to EMS screen bookmarks", metavar="PATH")

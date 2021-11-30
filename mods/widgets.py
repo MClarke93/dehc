@@ -1265,10 +1265,10 @@ class DataEntry(SuperWidget):
                 else:
                     value = self.w_hidden_data[index]
             
-            if info['required'] == 2 and value == "":
+            required = info.get('required',0)
+            if required == 2 and value == "":
                 warnings.append(field)
-
-            if info['required'] == 1 and value == "":
+            if required == 1 and value == "":
                 messagebox.showwarning("Missing Information", f"Could not save item because required field \"{field}\" is empty.")
                 self.logger.warning(f"Could not save item because required field \"{field}\" is empty")
                 break

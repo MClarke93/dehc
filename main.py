@@ -19,7 +19,7 @@ else:
 
 if __name__ == "__main__": # Multiprocessing library complains if this guard isn't used
     
-    DBVERSION = "20211130"
+    DBVERSION = "20211131"
     parser = argparse.ArgumentParser(description='Starts the Digital Evacuation Handling Center')
     parser.add_argument('app', nargs="?", default="EMS", help="which app to start: EMS, GC, TT or PB", choices=['EMS', 'GC', 'TT', 'PB'], metavar="APP")
     parser.add_argument('arg', nargs="?", default="", help="if app is GC, this specifies the vessel to gatecheck. If the app is TT, this specifies the container to look for vessels in. If the app is PB, this specifies the container to look for bags in", metavar="ARG")

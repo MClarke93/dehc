@@ -16,7 +16,7 @@ import mods.database as md
 
 # ----------------------------------------------------------------------------
 
-DBVERSION = "20211130"
+DBVERSION = "20211131"
 parser = argparse.ArgumentParser(description='Exports data from the DEHC database to \\csv.')
 parser.add_argument('-a','--auth', type=str, default="db_auth.json", help="relative path to database authentication file", metavar="PATH")
 parser.add_argument('-f','--forc', help="if included, forces the app to use the local copy of the database schema", action='store_true')
