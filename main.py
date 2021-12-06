@@ -12,7 +12,7 @@ if sys.version_info.major == 3 and sys.version_info.minor == 9:
     import mods.log as ml
     import mods.dehc_hardware as hw
 else:
-    print("This application must be run using Python 3.9.X.")
+    print("This application must be run using Python 3.9.X")
     sys.exit(1)
 
 # ----------------------------------------------------------------------------
@@ -29,7 +29,7 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
     parser.add_argument('-f','--forc', help="if included, forces the app to use the local copy of the database schema", action='store_true')
     parser.add_argument('-g','--godm', help="if included, opens the app in administrative mode", action='store_true')
     # '-h' brings up help
-    parser.add_argument('-l','--logg', default="DEBUG", help="minimum level of logging messages that are printed: DEBUG, INFO, WARNING, ERROR, CRITICAL, or NONE", choices=["DEBUG","INFO","WARNING","ERROR","CRITICAL","NONE"], metavar="LEVL")
+    parser.add_argument('-l','--logg', default="INFO", help="minimum level of logging messages that are printed: DEBUG, INFO, WARNING, ERROR, CRITICAL, or NONE", choices=["DEBUG","INFO","WARNING","ERROR","CRITICAL","NONE"], metavar="LEVL")
     parser.add_argument('-n','--name', type=str, default="dehc", help="which database namespace to use", metavar="NAME")
     parser.add_argument('-r','--read', help="if included, opens the app in read-only mode", action='store_true')
     parser.add_argument('-s','--sche', type=str, default="db_schema.json", help="relative path to database schema file", metavar="PATH")
@@ -37,13 +37,18 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
     parser.add_argument('-v','--vers', type=str, default=DBVERSION, help="schema version to expect", metavar="VERS")
     parser.add_argument('-w','--weba', type=str, default="web_auth.json", help="relative path to web server authentication file", metavar="PATH")
     parser.add_argument('-x','--xgui', help="if included, the gui won't be started", action='store_true')
+    parser.add_argument('-H','--Hardware', help="if included, disables all hardware functionality", action='store_false')
+    parser.add_argument('-HB','--HBarcode', help="if included, decactivates barcode scanner functionality", action='store_false')
+    parser.add_argument('-HN','--HNFC', help="if included, decactivates NFC reader functionality", action='store_false')
+    parser.add_argument('-HP','--HPrinter', help="if included, decactivates printer functionality", action='store_false')
+    parser.add_argument('-HS','--HScale', help="if included, decactivates scale functionality", action='store_false')
     parser.add_argument('-O','--ovdb', help="if included, disables database version detection. Use with caution, as it may result in lost data", action='store_true')
     args = parser.parse_args()
 
     # ----------------------------------------------------------------------------
 
     logger = ml.get(name="Main", level=args.logg)
-    logger.info("Application has started.")
+    logger.info("Application has started")
 
     if args.forc == True:
         logger.warning(f"Application will load schema from '{args.auth}' save it to the database")
@@ -53,7 +58,10 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
     if args.app == "EMS":
         hardware = None
         try:
-            hardware = hw.Hardware(makeNFCReader=True, makeBarcodeReader=True, makePrinter=True, makeScales=True)
+            if args.Hardware == True:
+                hardware = hw.Hardware(makeNFCReader=args.HNFC, makeBarcodeReader=args.HBarcode, makePrinter=args.HPrinter, makeScales=args.HScale)
+            else:
+                hardware = hw.Hardware(makeNFCReader=False, makeBarcodeReader=False, makePrinter=False, makeScales=False)
         except RuntimeError: #TODO: determine if this is still valid, since __main__ check
             pass
 
@@ -86,5 +94,5 @@ if __name__ == "__main__": # Multiprocessing library complains if this guard isn
         else:
             logger.critical("The container to look for bags in, and the container to move bags to, must both be specified")
 
-    logger.info("Application is ending.")
+    logger.info("Application is ending")
     sys.exit(0)

@@ -562,6 +562,10 @@ class DataEntry(SuperWidget):
         '''...'''
         #TODO: Add radial for Landscape/Portrait
 
+        if self.hardware.PRINTER_EXIST == False:
+            messagebox.showwarning("Printer Disabled", "Can't use the Print ID feature because the printer has been disabled.")
+            return
+
         orientation = tk.StringVar()
 
         printers = hw.listPrinters()

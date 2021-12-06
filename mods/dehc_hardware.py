@@ -2,13 +2,6 @@ from multiprocessing import Process, Queue
 import queue
 import time
 
-import mods.acr122u.dehc_nfc as NFC
-import mods.wedderburn_di_166.dehc_scales as Scales
-import mods.zebra_ds22_reader.dehc_barcode as Barcode
-import mods.zebra_zc300_printer.dehc_printer as Printer
-
-from PIL import Image
-
 def listPrinters():
     return Printer.listPrinters()
 
@@ -41,26 +34,39 @@ class Hardware:
     def __init__(self, makeScales = False, makeBarcodeReader = False, makeNFCReader = False, makePrinter = False):
         
         if makeScales:
+            import mods.wedderburn_di_166.dehc_scales as Scales
             self.inQueueScales = Queue(maxsize=1) # Only store the most recent value
             self.outQueueScales = Queue(maxsize=1) # For now, we don't need to stack up C2 messages
             self.processScales = Process(target=Scales.Scales_Worker, args=(self.outQueueScales, self.inQueueScales))
             self.processes.append(self.processScales)
+        else:
+            print("Scale support deactivated")
         if makeNFCReader:
+            import mods.acr122u.dehc_nfc as NFC
             self.inQueueNFC = Queue(maxsize=1) # Only store the most recent value
             self.outQueueNFC = Queue(maxsize=1) # For now, we don't need to stack up C2 messages
             self.processNFC = Process(target=NFC.NFC_Worker, args=(self.outQueueNFC, self.inQueueNFC))
             self.processes.append(self.processNFC)
+        else:
+            print("NFC Reader support deactivated")
         if makeBarcodeReader:
+            import mods.zebra_ds22_reader.dehc_barcode as Barcode
             self.inQueueBarcode = Queue(maxsize=1) # Only store the most recent value
             self.outQueueBarcode = Queue(maxsize=1) # For now, we don't need to stack up C2 messages
             self.processBarcode = Process(target=Barcode.Barcode_Worker, args=(self.outQueueBarcode, self.inQueueBarcode))
             self.processes.append(self.processBarcode)
+        else:
+            print("Barcode reader support deactivated")
         if makePrinter:
+            import mods.zebra_zc300_printer.dehc_printer as Printer
+            from PIL import Image
             self.inQueuePrinter = Queue(maxsize=1) # Only store the most recent value
             self.outQueuePrinter = Queue(maxsize=1000) # For now, we don't need to stack up C2 messages
             self.processPrinter = Process(target=Printer.Printer_Worker, args=(self.outQueuePrinter, self.inQueuePrinter))
             self.processes.append(self.processPrinter)
-            
+        else:
+            print("Printer support deactivated")
+
         self.startProcesses()
 
         self.SCALES_EXIST = makeScales
@@ -129,7 +135,7 @@ class Hardware:
                 self.lastBarcode = ''
         return self.lastBarcode
 
-    def sendNewIDCard(self, idCardImage: Image, printer: str):
+    def sendNewIDCard(self, idCardImage, printer):
         self.outQueuePrinter.put({"message": "idcard", "idcard": idCardImage, "printer": printer})
 
 if __name__ == "__main__":

@@ -66,15 +66,12 @@ if args.ever == False:
 # Main loop
 while True:
     for database in DATABASES:
-        try:
-            response = client.post_changes(db=database, include_docs=True, since=last[database]).get_result()
-            result = response['results']
-            for row in result:
-                output = {'db': database, 'log': row}
-                logger.info(output)
-            last[database] = response['last_seq']
-        except Exception as e:
-            logger.error(e)
+        response = client.post_changes(db=database, include_docs=True, since=last[database]).get_result()
+        result = response['results']
+        for row in result:
+            output = {'db': database, 'log': row}
+            logger.info(output)
+        last[database] = response['last_seq']
     time.sleep(POLLTIME)
 
 sys.exit(0)
