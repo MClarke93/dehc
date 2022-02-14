@@ -5,9 +5,10 @@
 __pycache__/
 pycache/
 
-# Ignore text documents except requirements.txt
+# Ignore text documents except certain ones
 *.txt
 !requirements.txt
+!requirements_win.txt
 !admin_guide.txt
 
 # Ignore csv files

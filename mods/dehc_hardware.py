@@ -1,5 +1,6 @@
 from multiprocessing import Process, Queue
 import queue
+import sys
 import time
 
 def listPrinters():
@@ -41,7 +42,9 @@ class Hardware:
             self.processes.append(self.processScales)
         else:
             print("Scale support deactivated")
-        if makeNFCReader:
+        
+        #Note, pycard is currently not installing correctly through pip. NFC support has been temporarily disabled!
+        if makeNFCReader and False:
             import mods.acr122u.dehc_nfc as NFC
             self.inQueueNFC = Queue(maxsize=1) # Only store the most recent value
             self.outQueueNFC = Queue(maxsize=1) # For now, we don't need to stack up C2 messages
@@ -49,6 +52,7 @@ class Hardware:
             self.processes.append(self.processNFC)
         else:
             print("NFC Reader support deactivated")
+
         if makeBarcodeReader:
             import mods.zebra_ds22_reader.dehc_barcode as Barcode
             self.inQueueBarcode = Queue(maxsize=1) # Only store the most recent value
@@ -57,7 +61,8 @@ class Hardware:
             self.processes.append(self.processBarcode)
         else:
             print("Barcode reader support deactivated")
-        if makePrinter:
+
+        if makePrinter and sys.platform == "win32":
             import mods.zebra_zc300_printer.dehc_printer as Printer
             from PIL import Image
             self.inQueuePrinter = Queue(maxsize=1) # Only store the most recent value
@@ -69,10 +74,14 @@ class Hardware:
 
         self.startProcesses()
 
+        #Note, pycard is currently not installing correctly through pip. NFC support has been temporarily disabled!
         self.SCALES_EXIST = makeScales
-        self.NFCREADER_EXIST = makeNFCReader
+        self.NFCREADER_EXIST = False
         self.BARCODEREADER_EXIST = makeBarcodeReader
-        self.PRINTER_EXIST = makePrinter
+        if sys.platform == "win32":
+            self.PRINTER_EXIST = makePrinter
+        else:
+            self.PRINTER_EXIST = False
 
     def startProcesses(self):
         for process in self.processes:

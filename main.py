@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-if sys.version_info.major == 3 and sys.version_info.minor == 9:
+if sys.version_info.major == 3:
     import apps.baggage as ab
     import apps.ems as ae
     import apps.marshal as am
@@ -12,7 +12,7 @@ if sys.version_info.major == 3 and sys.version_info.minor == 9:
     import mods.log as ml
     import mods.dehc_hardware as hw
 else:
-    print("This application must be run using Python 3.9.X")
+    print("This application must be run using Python 3")
     sys.exit(1)
 
 # ----------------------------------------------------------------------------
