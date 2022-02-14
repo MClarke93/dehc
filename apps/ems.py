@@ -45,7 +45,11 @@ class EMS():
 
         self.root = tk.Tk()
         self.root.title(f"EMS ({self.db.namespace} @ {self.db.db.data['url']}, Version {self.db.version})")
-        self.root.state('zoomed')
+        try:
+            self.root.state('zoomed')
+        except:
+            pass
+
         self.root.configure(background="#dcdad5")
 
         if autorun == True:
