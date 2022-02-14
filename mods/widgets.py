@@ -2484,10 +2484,10 @@ class ContainerManager(SuperWidget):
         if self.readonly == False:
             self.root.bind("<Control-Down>", lambda *_: self.w_bu_move_item.invoke(), add="+")
             self.root.bind("<Control-Up>", lambda *_: self.w_bu_move_subs.invoke(), add="+")
-            self.root.bind("<Control-Shift-KeyPress-!>", lambda *_: self.bookmark_change(preset="1"), add="+")
-            self.root.bind("<Control-Shift-KeyPress-@>", lambda *_: self.bookmark_change(preset="2"), add="+")
-            self.root.bind("<Control-Shift-KeyPress-#>", lambda *_: self.bookmark_change(preset="3"), add="+")
-            self.root.bind("<Control-Shift-KeyPress-$>", lambda *_: self.bookmark_change(preset="4"), add="+")
+            self.root.bind("<Control-Shift-KeyPress-1>", lambda *_: self.bookmark_change(preset="1"), add="+")
+            self.root.bind("<Control-Shift-KeyPress-2>", lambda *_: self.bookmark_change(preset="2"), add="+")
+            self.root.bind("<Control-Shift-KeyPress-3>", lambda *_: self.bookmark_change(preset="3"), add="+")
+            self.root.bind("<Control-Shift-KeyPress-4>", lambda *_: self.bookmark_change(preset="4"), add="+")
         
         self.root.bind("<F5>", lambda *_: self.refresh())
 
