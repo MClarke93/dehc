@@ -1,0 +1,28 @@
+version: "3.3"
+services:
+  ems:
+    build: .
+    depends_on:
+      - couchdb
+    #ports:
+    #  - "5000:5000"
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./docker-entrypoint.sh:/docker-entrypoint.sh:ro
+    environment:
+      - DISPLAY=${DISPLAY}
+    user: ${CURRENT_UID:?"Please run as follows 'CURRENT_UID=$(id -u):$(id -g) docker-compose up'"}
+    #ports:
+    #  - 5984:5984
+    entrypoint:
+      /bin/bash -c "/docker-entrypoint.sh"
+
+  couchdb:
+    image: couchdb
+    ports:
+      - 5984:5984
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=Creative
+
+
